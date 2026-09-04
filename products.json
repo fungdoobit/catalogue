@@ -1,0 +1,66 @@
+[
+  {
+    "name": "Wireless Earbuds Pro",
+    "image": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIiB2aWV3Qm94PSIwIDAgNTAwIDUwMCI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIiBmaWxsPSIjZjVmNWY3Ii8+Cjx0ZXh0IHg9IjI1MCIgeT0iMjUwIiBmb250LWZhbWlseT0iLWFwcGxlLXN5c3RlbSwgSGVsdmV0aWNhLCBBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyOCIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzFkMWQxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+V2lyZWxlc3MgRWFyYnVkcyBQcm88L3RleHQ+Cjwvc3ZnPg==",
+    "category": "Tech Accessories",
+    "badge": "Top Pick",
+    "price": "$29.99",
+    "link": "https://shopee.ph/placeholder-link-1"
+  },
+  {
+    "name": "3-in-1 Fast Charging Cable",
+    "image": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIiB2aWV3Qm94PSIwIDAgNTAwIDUwMCI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIiBmaWxsPSIjZjVmNWY3Ii8+Cjx0ZXh0IHg9IjI1MCIgeT0iMjUwIiBmb250LWZhbWlseT0iLWFwcGxlLXN5c3RlbSwgSGVsdmV0aWNhLCBBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyOCIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzFkMWQxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+My1pbi0xIEZhc3QgQ2hhcmdpbmcgQ2FibGU8L3RleHQ+Cjwvc3ZnPg==",
+    "category": "Tech Accessories",
+    "badge": "",
+    "price": "$9.99",
+    "link": "https://shopee.ph/placeholder-link-2"
+  },
+  {
+    "name": "Adjustable Phone Stand",
+    "image": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIiB2aWV3Qm94PSIwIDAgNTAwIDUwMCI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIiBmaWxsPSIjZjVmNWY3Ii8+Cjx0ZXh0IHg9IjI1MCIgeT0iMjUwIiBmb250LWZhbWlseT0iLWFwcGxlLXN5c3RlbSwgSGVsdmV0aWNhLCBBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyOCIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzFkMWQxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+QWRqdXN0YWJsZSBQaG9uZSBTdGFuZDwvdGV4dD4KPC9zdmc+",
+    "category": "Tech Accessories",
+    "badge": "",
+    "price": "$7.50",
+    "link": "https://shopee.ph/placeholder-link-3"
+  },
+  {
+    "name": "Aromatherapy Diffuser",
+    "image": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIiB2aWV3Qm94PSIwIDAgNTAwIDUwMCI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIiBmaWxsPSIjZjVmNWY3Ii8+Cjx0ZXh0IHg9IjI1MCIgeT0iMjUwIiBmb250LWZhbWlseT0iLWFwcGxlLXN5c3RlbSwgSGVsdmV0aWNhLCBBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyOCIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzFkMWQxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+QXJvbWF0aGVyYXB5IERpZmZ1c2VyPC90ZXh0Pgo8L3N2Zz4=",
+    "category": "Home & Kitchen",
+    "badge": "Top Pick",
+    "price": "$18.00",
+    "link": "https://shopee.ph/placeholder-link-4"
+  },
+  {
+    "name": "Stainless Steel Water Bottle",
+    "image": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIiB2aWV3Qm94PSIwIDAgNTAwIDUwMCI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIiBmaWxsPSIjZjVmNWY3Ii8+Cjx0ZXh0IHg9IjI1MCIgeT0iMjUwIiBmb250LWZhbWlseT0iLWFwcGxlLXN5c3RlbSwgSGVsdmV0aWNhLCBBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyOCIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzFkMWQxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+U3RhaW5sZXNzIFN0ZWVsIFdhdGVyIEJvdHRsZTwvdGV4dD4KPC9zdmc+",
+    "category": "Home & Kitchen",
+    "badge": "",
+    "price": "$12.99",
+    "link": "https://shopee.ph/placeholder-link-5"
+  },
+  {
+    "name": "Minimalist LED Desk Lamp",
+    "image": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIiB2aWV3Qm94PSIwIDAgNTAwIDUwMCI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIiBmaWxsPSIjZjVmNWY3Ii8+Cjx0ZXh0IHg9IjI1MCIgeT0iMjUwIiBmb250LWZhbWlseT0iLWFwcGxlLXN5c3RlbSwgSGVsdmV0aWNhLCBBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyOCIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzFkMWQxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+TWluaW1hbGlzdCBMRUQgRGVzayBMYW1wPC90ZXh0Pgo8L3N2Zz4=",
+    "category": "Home & Kitchen",
+    "badge": "",
+    "price": "$15.99",
+    "link": "https://shopee.ph/placeholder-link-6"
+  },
+  {
+    "name": "Canvas Tote Bag",
+    "image": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIiB2aWV3Qm94PSIwIDAgNTAwIDUwMCI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIiBmaWxsPSIjZjVmNWY3Ii8+Cjx0ZXh0IHg9IjI1MCIgeT0iMjUwIiBmb250LWZhbWlseT0iLWFwcGxlLXN5c3RlbSwgSGVsdmV0aWNhLCBBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyOCIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzFkMWQxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+Q2FudmFzIFRvdGUgQmFnPC90ZXh0Pgo8L3N2Zz4=",
+    "category": "Fashion & Style",
+    "badge": "",
+    "price": "$14.99",
+    "link": "https://shopee.ph/placeholder-link-7"
+  },
+  {
+    "name": "UV400 Sunglasses",
+    "image": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIiB2aWV3Qm94PSIwIDAgNTAwIDUwMCI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIiBmaWxsPSIjZjVmNWY3Ii8+Cjx0ZXh0IHg9IjI1MCIgeT0iMjUwIiBmb250LWZhbWlseT0iLWFwcGxlLXN5c3RlbSwgSGVsdmV0aWNhLCBBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyOCIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzFkMWQxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+VVY0MDAgU3VuZ2xhc3NlczwvdGV4dD4KPC9zdmc+",
+    "category": "Fashion & Style",
+    "badge": "Top Pick",
+    "price": "$11.50",
+    "link": "https://shopee.ph/placeholder-link-8"
+  }
+]

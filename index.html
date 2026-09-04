@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Picked & Packed — Curated Finds</title>
+  <meta name="description" content="A small, hand-picked collection of products worth buying — no clutter, no ads, just things I actually like." />
+
+  <!-- Open Graph tags: these control how the page looks when pasted into
+       Slack, WhatsApp, iMessage, etc. Without them, a shared link just
+       shows a bare URL and maybe a random screenshot.
+
+       og:image must be an absolute URL (crawlers fetch it separately from
+       the page, so a relative path or data: URI won't work) — it's set to
+       a placeholder here since the real domain isn't known until you
+       deploy. Update it to your live URL, e.g.
+       https://yourusername.github.io/catalogue/og-image.png — after
+       deploying (see README). og-image.png itself is a real file
+       committed in this repo, not a third-party image service, so it
+       always loads with no external dependency. -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Picked & Packed — Curated Finds" />
+  <meta property="og:description" content="A small, hand-picked collection of products worth buying — no clutter, no ads, just things I actually like." />
+  <meta property="og:image" content="https://REPLACE-WITH-YOUR-DEPLOYED-DOMAIN/og-image.png" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <header class="site-header">
+    <h1 class="site-title">Picked &amp; Packed</h1>
+    <p class="site-tagline">A few things worth buying, hand-picked by me.</p>
+  </header>
+
+  <main>
+    <!-- Search + category filters live together in one "controls" section
+         so they visually read as one toolbar above the grid. -->
+    <section class="controls">
+      <input
+        type="text"
+        id="search-input"
+        class="search-input"
+        placeholder="Search products…"
+        aria-label="Search products"
+      />
+
+      <!-- Filled in by script.js from the categories found in products.json,
+           so adding a new category to the data file is enough — no HTML edits. -->
+      <div id="category-pills" class="category-pills"></div>
+    </section>
+
+    <!-- Filled in by script.js with one .product-card per item. -->
+    <section id="product-grid" class="product-grid" aria-live="polite"></section>
+
+    <!-- Shown by script.js only when a search/filter combo matches nothing. -->
+    <p id="empty-state" class="empty-state" hidden>No products match your search.</p>
+  </main>
+
+  <footer class="site-footer">
+    <p>As an affiliate, I may earn a commission from qualifying purchases.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
