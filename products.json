@@ -65,7 +65,7 @@
   },
   {
     "name": "UGREEN Magnetic 10,000mAh Power Bank",
-    "image": "https://down-my.img.susercontent.com/file/sg-11134201-825ak-mqlaowbh4ky37b.webp",
+    "image": "images/ugreen-powerbank.png",
     "category": "Tech Accessories",
     "badge": "",
     "price": "",
@@ -74,11 +74,12 @@
   },
   {
     "name": "MOFT Snap Case for iPhone 17 Pro",
-    "image": "https://www.moft.com/cdn/shop/files/iPhone_17_Case26.jpg?v=1765803141",
+    "image": "images/moft-case.png",
     "category": "Tech Accessories",
     "subcategory": ["iPhone", "Pro"],
     "badge": "",
     "price": "",
-    "link": "https://s.shopee.com.my/qjEcGO1Ik"
+    "link": "https://s.shopee.com.my/qjEcGO1Ik",
+    "video": "videos/moft-case-demo.mp4"
   }
 ]
