@@ -135,13 +135,28 @@ body {
 
 /* ==========================================================================
    Hero / entrance
-   min-height (not height) so a longer tagline is never clipped. `svh`
+   .hero-wrap is taller than one screen purely to create a bit of scroll
+   distance to hold; .hero is `position: sticky` inside it, so it stays
+   pinned in view for that entire extra distance before releasing — same
+   sticky-inside-a-taller-wrapper trick as .site-nav, just used to make
+   something pause instead of slide in. The 60vh of "extra" is deliberately
+   modest: enough to let the subtitle's words settle in one at a time
+   without turning into a long empty scroll.
+
+   min-height (not height) so a longer subtitle is never clipped. `svh`
    ("small viewport height") is used instead of `vh` because mobile Safari
    counts `vh` as if the address bar were hidden — using `vh` there makes
    the hero taller than the visible screen until you scroll once. `svh`
    accounts for the address bar from the start.
    ========================================================================== */
+.hero-wrap {
+  min-height: 160svh;
+  position: relative;
+}
+
 .hero {
+  position: sticky;
+  top: 0;
   min-height: 100svh;
   display: flex;
   flex-direction: column;
@@ -150,7 +165,6 @@ body {
   text-align: center;
   padding: 24px;
   gap: 12px;
-  position: relative;
 }
 
 .hero-title {
@@ -175,10 +189,10 @@ body {
 .hero-subtitle .word {
   color: var(--color-text-muted);
   opacity: 0.25;
-  filter: blur(3px);
-  transition: color 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-    filter 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: blur(4px);
+  transition: color 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .hero-subtitle .word.is-active {

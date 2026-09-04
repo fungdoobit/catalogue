@@ -18,6 +18,7 @@ const pillsEl = document.getElementById("category-pills");
 const searchInputEl = document.getElementById("search-input");
 const emptyStateEl = document.getElementById("empty-state");
 const heroEl = document.getElementById("hero");
+const heroWrapEl = document.getElementById("hero-wrap");
 const navEl = document.getElementById("site-nav");
 const controlsEl = document.querySelector(".controls");
 
@@ -78,20 +79,19 @@ heroSubtitleEl.innerHTML = subtitleWords
   .join(" ");
 const subtitleWordEls = heroSubtitleEl.querySelectorAll(".word");
 
-// The subtitle sits vertically centered inside the hero, not at its very
-// bottom — so tying "highlight finished" to "hero fully scrolled away"
-// (the previous approach) meant the last word or two finished lighting up
-// after the text had already scrolled off the top of the screen, which is
-// why it looked like it never finished. Instead, this measures the
-// subtitle's own on-screen position once at load, and finishes the
-// highlight while it's still comfortably inside the viewport (25% of the
-// way down) rather than at the very edge.
-const subtitleStartTop = heroSubtitleEl.getBoundingClientRect().top;
-const subtitleFinishTop = window.innerHeight * 0.25;
-const subtitleScrollDistance = Math.max(subtitleStartTop - subtitleFinishTop, 1);
-
+// #hero is `position: sticky` inside #hero-wrap, which is taller than one
+// screen (see .hero-wrap in styles.css) — so scrolling through that extra
+// height holds the hero in place instead of sweeping it past instantly.
+// This reads that hold's progress directly from #hero-wrap's own position,
+// the same technique as the reveal-on-scroll cards use for "has this
+// entered view", just turned into a continuous 0-1 value instead of a
+// one-time yes/no: 0 while still at the very top, 1 once the wrapper's
+// bottom is about to reach the top of the viewport (exactly when the hero
+// is about to release and continue scrolling away).
 function updateSubtitleHighlight() {
-  const progress = Math.min(Math.max(window.scrollY / subtitleScrollDistance, 0), 1);
+  const rect = heroWrapEl.getBoundingClientRect();
+  const holdDistance = rect.height - window.innerHeight;
+  const progress = holdDistance > 0 ? Math.min(Math.max(-rect.top / holdDistance, 0), 1) : 1;
   const litCount = Math.round(progress * subtitleWordEls.length);
   subtitleWordEls.forEach((word, i) => {
     word.classList.toggle("is-active", i < litCount);
