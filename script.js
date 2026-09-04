@@ -262,6 +262,15 @@ function buildProductCard(product) {
   const card = document.createElement("article");
   card.className = "product-card";
 
+  // Everything except the "Get it" button lives in here — photo, category,
+  // name, price. This grouping matters for the hover-preview video: it
+  // covers exactly this area (see attachVideoPreview() below), so the
+  // button is the one thing that always stays visible and clickable, and
+  // the card only ever pops out as a single whole unit rather than the
+  // video and the card animating separately at different sizes.
+  const previewArea = document.createElement("div");
+  previewArea.className = "product-preview-area";
+
   const imageWrap = document.createElement("div");
   imageWrap.className = "product-image-wrap";
 
@@ -277,16 +286,10 @@ function buildProductCard(product) {
   image.alt = product.name;
   image.loading = "lazy";
   imageWrap.appendChild(image);
+  previewArea.appendChild(imageWrap);
 
-  // Optional per-product hover-preview video — see attachVideoPreview()
-  // below. Products with no "video" field in products.json simply never
-  // get this element at all, so there's nothing extra for them to load.
-  if (product.video) {
-    attachVideoPreview(card, imageWrap, product.video);
-  }
-
-  const body = document.createElement("div");
-  body.className = "product-body";
+  const info = document.createElement("div");
+  info.className = "product-info";
 
   const category = document.createElement("p");
   category.className = "product-category";
@@ -296,15 +299,25 @@ function buildProductCard(product) {
   name.className = "product-name";
   name.textContent = product.name;
 
-  body.appendChild(category);
-  body.appendChild(name);
+  info.appendChild(category);
+  info.appendChild(name);
 
   // Price is optional per the data model, so only render it when present.
   if (product.price) {
     const price = document.createElement("p");
     price.className = "product-price";
     price.textContent = product.price;
-    body.appendChild(price);
+    info.appendChild(price);
+  }
+
+  previewArea.appendChild(info);
+  card.appendChild(previewArea);
+
+  // Optional per-product hover-preview video — see attachVideoPreview()
+  // below. Products with no "video" field in products.json simply never
+  // get this element at all, so there's nothing extra for them to load.
+  if (product.video) {
+    attachVideoPreview(card, previewArea, product.video);
   }
 
   const cta = document.createElement("a");
@@ -314,10 +327,8 @@ function buildProductCard(product) {
   cta.target = "_blank";        // opens in a new tab
   cta.rel = "noopener noreferrer"; // security best practice for target="_blank" links:
                                     // stops the opened page from accessing window.opener
-  body.appendChild(cta);
+  card.appendChild(cta);
 
-  card.appendChild(imageWrap);
-  card.appendChild(body);
   return card;
 }
 
@@ -331,26 +342,29 @@ const ICON_MUTED =
 const ICON_UNMUTED =
   '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>';
 
-// Holding hover on a card fades in a short looping video over the static
-// image, grown taller via the ".product-video-overlay.is-visible" state in
-// styles.css to show more of the frame, with the card itself elevated
-// above its neighbors (the "is-previewing" class) — a quick preview, not a
-// link to anywhere. Tries to play with sound; falls back to muted if the
-// browser blocks that (see the mouseenter handler below for why). Only
-// wired up on devices with a real mouse (supportsFineCursor, computed
-// further down for the custom cursor too): a touchscreen has no "hover and
-// wait", just taps, so this would never make sense to trigger there.
-function attachVideoPreview(card, imageWrap, videoUrl) {
+// Holding hover on a card replaces the photo, category, name, and price
+// (everything in .product-preview-area — see buildProductCard() above)
+// with a short looping video covering that exact same area, while the
+// whole card lifts above its neighbors (the "is-previewing" class in
+// styles.css) as one single unit — a quick preview, not a link to
+// anywhere. The "Get it" button lives outside .product-preview-area, so
+// it's the one thing that always stays visible underneath. Tries to play
+// with sound; falls back to muted if the browser blocks that (see the
+// mouseenter handler below for why). Only wired up on devices with a real
+// mouse (supportsFineCursor, computed further down for the custom cursor
+// too): a touchscreen has no "hover and wait", just taps, so this would
+// never make sense to trigger there.
+function attachVideoPreview(card, previewArea, videoUrl) {
   if (!supportsFineCursor) return;
 
-  // The video and its mute button live inside this shared wrapper (rather
-  // than directly in imageWrap) so they grow together as one unit — see
-  // .product-video-overlay in styles.css for why that matters: it's what
-  // keeps the mute button correctly anchored to the video's actual corner
-  // even as the video grows past its original square.
+  // inset: 0 here exactly matches .product-preview-area's own box (photo
+  // + text), covering it edge-to-edge — not growing past it, unlike the
+  // earlier version of this feature. That's what removed both bugs from
+  // that version at once: nothing to misalign with the static image
+  // underneath, and nothing to accidentally end up wider than the card.
   const overlay = document.createElement("div");
   overlay.className = "product-video-overlay";
-  imageWrap.appendChild(overlay);
+  previewArea.appendChild(overlay);
 
   const video = document.createElement("video");
   video.className = "product-video";

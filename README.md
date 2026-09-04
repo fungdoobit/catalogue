@@ -66,11 +66,12 @@ Open `products.json` and edit the array. Each product looks like:
 omit `price`, or omit `video` entirely if a product doesn't have one.
 
 `video` (optional) is a short looping preview clip. Hover a card for
-0.7s on desktop and the video area fades in and grows taller (showing
-more of the frame than the square thumbnail crop), with the card lifted
-above its neighbors — a quick preview, not a link anywhere. It's skipped
-entirely on touch devices (there's no "hover and wait" gesture on a
-phone), and the video file itself isn't downloaded until someone
+0.7s on desktop and it takes over the photo, category, name, and price
+with the video (the "Get it" button is the one thing that stays put and
+visible below it), while the whole card lifts and grows above its
+neighbors as a single unit — a quick preview, not a link anywhere. It's
+skipped entirely on touch devices (there's no "hover and wait" gesture
+on a phone), and the video file itself isn't downloaded until someone
 actually hovers long enough to see it, so products without a video cost
 nothing extra and products with one don't load their clip on page load.
 

@@ -418,68 +418,62 @@ main {
   box-shadow: var(--shadow-card-hover);
 }
 
-/* Added by script.js alongside the video preview. No transform/scale
-   here (that was an earlier version) — CSS transforms scale *all*
-   descendants too, so the card's own scale was compounding on top of
-   .product-video-overlay's independent growth below, making the video
-   balloon out wider than the card itself. Now the card only elevates
-   (z-index) and gets a bigger shadow; all of the actual size change
-   comes from the overlay growing on its own, so there's exactly one
-   source of "bigger" instead of two multiplying together.
-   `overflow: visible` (overriding the card's normal overflow: hidden,
-   which is what gives it rounded corners that clip its contents) is what
-   lets the overlay spill past the card's own top/bottom edges once it
-   grows taller than its box. */
+/* Added by script.js alongside the video preview. The whole card scales
+   up together as a single unit — this is the *only* thing that changes
+   size while previewing (earlier versions also grew the video
+   independently, which either compounded with this scale or leaked the
+   static image out from behind a mismatched overlay; there's nothing
+   left for either bug to come from now). Because everything — photo,
+   video overlay, text, all still under the card's own overflow: hidden —
+   scales together, rounded corners and clipping stay correct throughout,
+   so unlike an earlier version this doesn't need overflow: visible at
+   all. Sets its own transition (slower than the base card's 0.15s hover
+   lift, and matching .product-video-overlay's fade below) so the scale
+   and the video fade read as one coordinated motion, not two racing
+   animations finishing at different times. */
 .product-card.is-previewing {
+  transform: scale(1.15);
   z-index: 30;
-  overflow: visible;
   box-shadow: 0 12px 20px rgba(0, 0, 0, 0.14), 0 32px 56px rgba(0, 0, 0, 0.2);
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Everything except the "Get it" button — see the comment above
+   buildProductCard() in script.js for why it's grouped like this. */
+.product-preview-area {
+  position: relative; /* anchors .product-video-overlay to this exact area, photo + text, not just the image */
+  display: flex;
+  flex-direction: column;
 }
 
 .product-image-wrap {
   aspect-ratio: 1 / 1;
   background: var(--color-bg);
-  position: relative; /* anchors .badge, .product-video and the mute button to this box specifically, not the whole card */
+  position: relative; /* anchors .badge to this box specifically, not the whole preview area */
 }
 
 /* Only created by script.js for products that have a "video" field —
-   holding hover on the card fades this in over the static image (see
+   holding hover on the card fades this in over the photo and text (see
    attachVideoPreview() in script.js for the timing). Groups the video
-   and its mute button together so they grow as one unit — the button
-   stays correctly anchored to this wrapper's actual corner no matter how
-   big it gets, rather than being anchored to the original small square
-   and drifting out of position as the video grows past it.
+   and its mute button together so the button always sits correctly in
+   the corner of whatever the video is currently covering.
 
-   inset: 0 at rest exactly matches the static image beneath it (the
-   square thumbnail crop). Growing to negative inset values in
-   .is-visible below is what reveals more of the original video frame
-   instead of staying locked to that same tight square — this wrapper
-   gets bigger than its own box, which .product-card.is-previewing above
-   allows it to do without being clipped. It's this wrapper that grows,
-   not .product-image-wrap itself, specifically so the card's actual
-   layout size (and therefore the grid around it) never changes — only
-   this one absolutely-positioned, already-out-of-flow element does. */
+   inset: 0 exactly matches .product-preview-area's own box — the video
+   covers precisely the photo + text region, no more and no less, and
+   never grows past it. The "pop" is the card scaling as a whole (see
+   .product-card.is-previewing above); this overlay only ever fades. */
 .product-video-overlay {
   position: absolute;
   inset: 0;
-  border-radius: var(--radius-card);
-  overflow: hidden; /* clips the video to this wrapper's own rounded shape once it's bigger than image-wrap */
   opacity: 0;
   /* Same easing curve as the hero's rise-in animation, for one consistent
-     feel across the site. opacity and inset share this exact timing so
-     the fade and the grow read as one motion, not two out-of-sync ones. */
-  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), inset 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+     feel across the site. */
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none; /* lets hover/click reach the card underneath; the mute button re-enables its own */
 }
 
 .product-video-overlay.is-visible {
   opacity: 1;
-  /* Grows taller only — left/right stay at 0, flush with the card's own
-     width, specifically so it can never end up wider than the card
-     around it. Vertical-only growth still reveals more of a typical
-     vertical product clip's frame, which is what was getting lost to the
-     square thumbnail crop in the first place. */
-  inset: -32% 0;
 }
 
 .product-video {
@@ -488,6 +482,7 @@ main {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  background: #000; /* the overlay covers the text area too, which has no photo of its own to show underneath */
 }
 
 /* Videos always start muted (autoplay-with-sound only works right after
@@ -548,12 +543,11 @@ main {
   border-radius: var(--radius-pill);
 }
 
-.product-body {
+.product-info {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 16px;
-  flex: 1; /* pushes the CTA button to the bottom even when card heights differ */
+  padding: 16px 16px 0;
 }
 
 .product-category {
@@ -575,8 +569,13 @@ main {
 }
 
 .product-cta {
-  display: inline-block;
-  margin-top: 10px;
+  display: block;
+  /* Now a direct child of .product-card rather than nested inside the
+     old padded .product-body wrapper (which no longer exists — that
+     padding is split between .product-info's top/sides and this margin),
+     so it needs its own spacing on all four sides to land in the same
+     visual place as before. */
+  margin: 10px 16px 16px;
   padding: 10px 16px;
   text-align: center;
   text-decoration: none;
