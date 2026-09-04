@@ -62,5 +62,13 @@
     "badge": "Top Pick",
     "price": "$11.50",
     "link": "https://shopee.ph/placeholder-link-8"
+  },
+  {
+    "name": "UGREEN Magnetic 10,000mAh Power Bank",
+    "image": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIiB2aWV3Qm94PSIwIDAgNTAwIDUwMCI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIiBmaWxsPSIjZjVmNWY3Ii8+Cjx0ZXh0IHg9IjI1MCIgeT0iMjUwIiBmb250LWZhbWlseT0iLWFwcGxlLXN5c3RlbSwgSGVsdmV0aWNhLCBBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNCIgZm9udC13ZWlnaHQ9IjYwMCIgZmlsbD0iIzFkMWQxZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+VUdSRUVOIFBvd2VyIEJhbms8L3RleHQ+Cjwvc3ZnPg==",
+    "category": "Tech Accessories",
+    "badge": "",
+    "price": "",
+    "link": "https://s.shopee.com.my/8V8fkBubvs"
   }
 ]
