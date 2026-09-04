@@ -43,6 +43,18 @@
     <section class="hero" id="hero">
       <h1 class="hero-title">Catalogue No. 01</h1>
       <p class="hero-subtitle" id="hero-subtitle">Thoughtfully curated essentials</p>
+
+      <!-- Fills the open space below the subtitle with something that
+           actually responds to scrolling, instead of leaving it blank:
+           script.js drives .hero-divider-fill's height with the exact
+           same 0-1 progress value that lights up the subtitle's words
+           (see updateSubtitleHighlight()), so the line fills in step
+           with them — one continuous piece of motion, not two unrelated
+           effects sharing a page. -->
+      <div class="hero-divider" aria-hidden="true">
+        <span class="hero-divider-fill" id="hero-divider-fill"></span>
+      </div>
+
       <div class="scroll-cue" aria-hidden="true">
         <span>Scroll to explore</span>
         <span class="scroll-cue-arrow">

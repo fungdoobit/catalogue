@@ -152,6 +152,11 @@ body {
 .hero-wrap {
   min-height: 160svh;
   position: relative;
+  /* A very slight warm-to-cool wash from top to bottom, so the transition
+     from hero into the catalogue reads as a graceful descent rather than
+     a flat cut — subtle enough that it never looks like a "section",
+     just a gentle change in light. */
+  background: linear-gradient(180deg, var(--color-bg) 0%, #f1f1f3 100%);
 }
 
 .hero {
@@ -214,6 +219,65 @@ body {
     opacity: 1;
     filter: none;
     transition: none;
+  }
+}
+
+/* A slender vertical line filling the open space below the subtitle — see
+   the comment on the element itself in index.html for why it exists.
+   The outer element is the always-visible faint track; .hero-divider-fill
+   is the accent-colored portion script.js grows from 0 to 100% height as
+   you scroll through the hero's hold, top-down, exactly like a level
+   filling up. */
+.hero-divider {
+  position: relative;
+  width: 1px;
+  height: 90px;
+  background: var(--color-border);
+  overflow: visible;
+  /* Draws itself in once, top-down, alongside the rest of the hero's
+     entrance — animation-fill-mode: both (the "both" below) keeps it at
+     zero height until this starts, so there's no flash of the full line
+     before the scroll-driven fill has anything to say. */
+  animation: divider-draw-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.5s;
+}
+
+.hero-divider-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 0%; /* set inline by script.js every scroll frame, 0-100% */
+  background: linear-gradient(180deg, var(--color-accent) 0%, var(--color-accent-hover) 100%);
+}
+
+/* A small glowing point riding the fill's leading edge — reads as a
+   traveling spark rather than a plain progress bar. */
+.hero-divider-fill::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 10px 2px rgba(0, 113, 227, 0.55);
+  transform: translateX(-50%);
+}
+
+@keyframes divider-draw-in {
+  from {
+    height: 0;
+  }
+  to {
+    height: 90px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-divider {
+    animation: none;
   }
 }
 
@@ -355,6 +419,12 @@ main {
      nav bar so it never overlaps the search bar once it slides into
      view — see the --nav-height comment in the design tokens above. */
   padding: calc(24px + var(--nav-height)) 24px 64px;
+  /* Picks up exactly where .hero-wrap's own gradient leaves off (same
+     #f1f1f3), then eases back to the page's normal background over the
+     next stretch of scrolling — without this, the two independent
+     backgrounds would meet at a visible hard seam right where the hero
+     hands off to the grid. */
+  background: linear-gradient(180deg, #f1f1f3 0%, var(--color-bg) 260px, var(--color-bg) 100%);
 }
 
 .controls {

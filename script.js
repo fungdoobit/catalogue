@@ -80,6 +80,7 @@ heroSubtitleEl.innerHTML = subtitleWords
   .map((word) => `<span class="word">${word}</span>`)
   .join(" ");
 const subtitleWordEls = heroSubtitleEl.querySelectorAll(".word");
+const heroDividerFillEl = document.getElementById("hero-divider-fill");
 
 // #hero is `position: sticky` inside #hero-wrap, which is taller than one
 // screen (see .hero-wrap in styles.css) — so scrolling through that extra
@@ -98,6 +99,11 @@ function updateSubtitleHighlight() {
   subtitleWordEls.forEach((word, i) => {
     word.classList.toggle("is-active", i < litCount);
   });
+
+  // Same progress value, reused directly as a percentage height — the
+  // divider line underneath the subtitle fills top-down in exact lockstep
+  // with the words lighting up, rather than running on its own timer.
+  heroDividerFillEl.style.height = `${progress * 100}%`;
 }
 
 let subtitleTicking = false;
