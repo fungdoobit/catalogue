@@ -259,12 +259,15 @@ body {
 }
 
 .philosophy-text {
-  max-width: 720px;
-  font-size: clamp(1.4rem, 3.2vw, 2.1rem);
-  font-weight: 600;
-  line-height: 1.5;
+  /* A short, three-word statement reads as premium when it's treated like
+     a headline (big, bold, tight tracking) rather than body copy — same
+     scale of move as .hero-title, not a shrunken paragraph. */
+  max-width: 900px;
+  font-size: clamp(2.4rem, 6.5vw, 4.5rem);
+  font-weight: 800;
+  line-height: 1.2;
   text-align: center;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.03em;
 }
 
 /* script.js wraps every word in one of these. Unlit words use the same
