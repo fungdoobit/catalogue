@@ -167,21 +167,31 @@ body {
 
 /* script.js wraps every word of .hero-subtitle in one of these and toggles
    "is-active" based on scroll position — see updateSubtitleHighlight() in
-   script.js. Unlit words use the same muted gray as secondary text
-   elsewhere, not a near-invisible one — it's a reading progression, not a
-   puzzle. */
+   script.js. Unlit words are faint and slightly out of focus rather than
+   fully invisible (a flat opacity: 0 would make words pop out of nowhere,
+   which reads as a gimmick rather than a reveal) — as each one activates
+   it sharpens and darkens, like a soft focus pull. Same easing curve as
+   the hero's own entrance animation, so it reads as one system. */
 .hero-subtitle .word {
   color: var(--color-text-muted);
-  transition: color 0.2s ease;
+  opacity: 0.25;
+  filter: blur(3px);
+  transition: color 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .hero-subtitle .word.is-active {
   color: var(--color-text);
+  opacity: 1;
+  filter: blur(0);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .hero-subtitle .word {
     color: var(--color-text);
+    opacity: 1;
+    filter: none;
     transition: none;
   }
 }

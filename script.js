@@ -64,15 +64,12 @@ observeReveal(controlsEl, 0);
 // Hero subtitle: scroll-scrubbed word highlight
 // Unlike observeReveal above (which is a one-time "has this scrolled into
 // view yet?" check), this needs a continuous 0-1 progress value tied to
-// scroll position. Rather than reserving a separate tall section for it,
-// this rides the scroll distance the hero already needs to scroll fully
-// out of view (heroEl.offsetHeight) — the same distance that triggers the
-// nav bar above — so no extra page space is spent on the effect.
+// scroll position.
 // ---------------------------------------------------------------------
 const heroSubtitleEl = document.getElementById("hero-subtitle");
 
 // Split the subtitle into one <span class="word"> per word, so each word
-// can be colored independently. This is safe to do with innerHTML here
+// can be animated independently. This is safe to do with innerHTML here
 // specifically because the text is our own hard-coded copy in index.html,
 // not data from products.json or any other untrusted source.
 const subtitleWords = heroSubtitleEl.textContent.trim().split(/\s+/);
@@ -81,10 +78,20 @@ heroSubtitleEl.innerHTML = subtitleWords
   .join(" ");
 const subtitleWordEls = heroSubtitleEl.querySelectorAll(".word");
 
+// The subtitle sits vertically centered inside the hero, not at its very
+// bottom — so tying "highlight finished" to "hero fully scrolled away"
+// (the previous approach) meant the last word or two finished lighting up
+// after the text had already scrolled off the top of the screen, which is
+// why it looked like it never finished. Instead, this measures the
+// subtitle's own on-screen position once at load, and finishes the
+// highlight while it's still comfortably inside the viewport (25% of the
+// way down) rather than at the very edge.
+const subtitleStartTop = heroSubtitleEl.getBoundingClientRect().top;
+const subtitleFinishTop = window.innerHeight * 0.25;
+const subtitleScrollDistance = Math.max(subtitleStartTop - subtitleFinishTop, 1);
+
 function updateSubtitleHighlight() {
-  // 0 at the very top of the page, 1 once you've scrolled one hero's-height
-  // — right around when the hero has fully exited and the nav bar appears.
-  const progress = Math.min(Math.max(window.scrollY / heroEl.offsetHeight, 0), 1);
+  const progress = Math.min(Math.max(window.scrollY / subtitleScrollDistance, 0), 1);
   const litCount = Math.round(progress * subtitleWordEls.length);
   subtitleWordEls.forEach((word, i) => {
     word.classList.toggle("is-active", i < litCount);
