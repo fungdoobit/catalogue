@@ -354,7 +354,18 @@ main {
   box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.12);
 }
 
-/* Flexbox (not grid) here because the pills are a single row of
+/* Holds one .category-pills row per drill-down level (see
+   renderCategoryPills() in script.js) stacked vertically — this wrapper
+   itself doesn't lay out pills, it just stacks whichever rows currently
+   exist, so it stays simple however many levels deep you go. */
+.category-pill-rows {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Flexbox (not grid) here because the pills within one row are
    variable-width items that should wrap naturally and stay centered —
    exactly the "flow of items" problem flexbox is built for. Grid would be
    overkill for a one-dimensional row like this. */
@@ -363,6 +374,20 @@ main {
   flex-wrap: wrap;
   justify-content: center;
   gap: 10px;
+}
+
+/* Each level nests inside the previous, so its pills read as
+   "sub-options" rather than an equally-weighted parallel row — smaller
+   and slightly muted until picked, same trick .product-category already
+   uses elsewhere for de-emphasized labels. */
+.category-pills ~ .category-pills .pill {
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.category-pills ~ .category-pills .pill.active {
+  color: #fff;
 }
 
 .pill {

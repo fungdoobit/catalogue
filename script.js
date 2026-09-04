@@ -9,9 +9,11 @@
 // Keeping data (products.json) separate from this file means: adding a
 // 9th product later means editing JSON only — never touching this logic.
 
-let allProducts = [];       // full list, loaded once from products.json
-let activeCategory = "All"; // which pill is currently selected
-let searchTerm = "";        // current text in the search box
+let allProducts = [];  // full list, loaded once from products.json
+let activePath = [];   // the drill-down category selection — [] means "All".
+                        // e.g. ["Tech Accessories", "iPhone", "Pro"] once
+                        // three levels deep. See getProductPath() below.
+let searchTerm = "";    // current text in the search box
 
 const gridEl = document.getElementById("product-grid");
 const pillsEl = document.getElementById("category-pills");
@@ -202,7 +204,7 @@ async function init() {
     return;
   }
 
-  buildCategoryPills();
+  renderCategoryPills();
   render();
 
   searchInputEl.addEventListener("input", (event) => {
@@ -211,35 +213,102 @@ async function init() {
   });
 }
 
-// Builds one pill per unique category found in the data, plus an "All"
-// pill at the start. Using a Set here is just the standard JS way to get
-// unique values out of an array.
-function buildCategoryPills() {
-  const categories = ["All", ...new Set(allProducts.map((p) => p.category))];
+// A product's full category path, top to bottom — "Tech Accessories" for
+// most products, or ["Tech Accessories", "iPhone", "Pro"] for something
+// filed all the way down under a specific iPhone model. `subcategory` is
+// entirely optional in products.json; products that don't have one are
+// just a single-level path.
+function getProductPath(product) {
+  return [product.category, ...(product.subcategory || [])];
+}
 
-  pillsEl.innerHTML = "";
-  categories.forEach((category) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "pill" + (category === activeCategory ? " active" : "");
-    button.textContent = category;
-    button.addEventListener("click", () => {
-      activeCategory = category;
-      // Move the "active" class to whichever pill was just clicked.
-      pillsEl.querySelectorAll(".pill").forEach((pill) => pill.classList.remove("active"));
-      button.classList.add("active");
-      render();
-    });
-    pillsEl.appendChild(button);
+// Every distinct value that appears at a given depth, among products whose
+// path matches activePath up to that depth. This is what makes the whole
+// pill system data-driven rather than a hand-maintained list: add a
+// product with a new subcategory anywhere in products.json, and a pill for
+// it appears automatically next render — there's no separate place that
+// has to be told "iPhone" or "Pro" exist. It also means a subcategory with
+// zero products yet (say, "17e") simply has no pill yet, rather than
+// showing an option that leads to an empty grid.
+function getOptionsAtLevel(level) {
+  const options = new Set();
+  allProducts.forEach((product) => {
+    const path = getProductPath(product);
+    // Only levels *before* this one should constrain it — e.g. level 0
+    // (the top row) must always offer every top-level category, regardless
+    // of how deep activePath currently goes; only level 1 onward should
+    // care what's picked at level 0. Comparing against the whole
+    // activePath instead of activePath.slice(0, level) was the bug here:
+    // it made every row silently inherit constraints from levels deeper
+    // than itself, so once you'd drilled down, shallower rows lost their
+    // other options entirely.
+    const matchesPathSoFar = activePath
+      .slice(0, level)
+      .every((value, i) => path[i] === value);
+    if (matchesPathSoFar && path.length > level) {
+      options.add(path[level]);
+    }
   });
+  return [...options];
+}
+
+// Renders one pill row per level of the drill-down (top-level categories,
+// then subcategories once one is selected, and so on) — called every time
+// the selection changes, not just once at load, since which rows exist at
+// all depends on how deep activePath currently goes.
+function renderCategoryPills() {
+  pillsEl.innerHTML = "";
+
+  for (let level = 0; ; level++) {
+    // A row for `level` only makes sense once every level before it has
+    // actually been chosen — e.g. no "Pro" row until "iPhone" is selected,
+    // even though .every() on activePath.slice(0, level) would otherwise
+    // vacuously "match" everything when activePath doesn't reach this deep
+    // yet (an empty check trivially passes for any product).
+    if (level > activePath.length) break;
+
+    const options = getOptionsAtLevel(level);
+    if (options.length === 0) break; // nothing left to drill into at this depth
+
+    const row = document.createElement("div");
+    row.className = "category-pills";
+
+    ["All", ...options].forEach((option) => {
+      const isAll = option === "All";
+      const isActive = isAll ? activePath.length === level : activePath[level] === option;
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "pill" + (isActive ? " active" : "");
+      button.textContent = option;
+      button.addEventListener("click", () => {
+        // Truncating to `level` first means picking a new value at this
+        // depth always discards whatever was selected deeper than it —
+        // e.g. switching from "iPhone" to "Home & Kitchen" clears "Pro"
+        // too, rather than leaving a stale, no-longer-relevant selection.
+        activePath = activePath.slice(0, level);
+        if (!isAll) activePath.push(option);
+        renderCategoryPills();
+        render();
+      });
+      row.appendChild(button);
+    });
+
+    pillsEl.appendChild(row);
+  }
 }
 
 // Applies the current search text + category filter, then redraws the grid.
 // Both filters are combined with AND: a product must match the selected
-// category AND contain the search text in its name.
+// category AND contain the search text in its name. "Matches the category"
+// means activePath is a prefix of the product's own path — e.g. selecting
+// just "Tech Accessories" (activePath length 1) matches every product
+// under it regardless of subcategory, while drilling down to
+// ["Tech Accessories", "iPhone", "Pro"] only matches that exact branch.
 function render() {
   const filtered = allProducts.filter((product) => {
-    const matchesCategory = activeCategory === "All" || product.category === activeCategory;
+    const path = getProductPath(product);
+    const matchesCategory = activePath.every((value, i) => path[i] === value);
     const matchesSearch = product.name.toLowerCase().includes(searchTerm);
     return matchesCategory && matchesSearch;
   });

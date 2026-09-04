@@ -55,6 +55,7 @@ Open `products.json` and edit the array. Each product looks like:
   "name": "Product Name",
   "image": "https://example.com/image.jpg",
   "category": "Some Category",
+  "subcategory": ["Sub Level 1", "Sub Level 2"],
   "badge": "Top Pick",
   "price": "$19.99",
   "link": "https://your-affiliate-link.com",
@@ -62,8 +63,30 @@ Open `products.json` and edit the array. Each product looks like:
 }
 ```
 
-`badge`, `price`, and `video` are all optional — leave `badge` as `""`,
-omit `price`, or omit `video` entirely if a product doesn't have one.
+`subcategory`, `badge`, `price`, and `video` are all optional — leave
+`badge` as `""`, omit `price`, or omit `subcategory`/`video` entirely if
+a product doesn't have one.
+
+### Subcategories (drill-down filtering)
+
+`subcategory` is an array representing a path *underneath* `category`,
+as deep as you want — for example, a product filed under Tech
+Accessories → iPhone → Pro would have:
+
+```json
+"category": "Tech Accessories",
+"subcategory": ["iPhone", "Pro"]
+```
+
+The category pills pick this up automatically: selecting "Tech
+Accessories" reveals a second row with "iPhone" (and anything else
+found at that level), selecting "iPhone" reveals a third row with "Pro"
+(and any other iPhone models you've added products for), and so on.
+There's nothing to register anywhere else — a pill only ever appears
+once a product actually exists for it, so you never end up with a
+filter that leads to an empty grid. Adding a product for a new model
+(say, `["iPhone", "17e"]`) is enough for its own pill to show up next to
+"Pro" automatically.
 
 `video` (optional) is a short looping preview clip. Hover a card for
 0.7s on desktop and it takes over the photo, category, name, and price

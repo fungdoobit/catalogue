@@ -66,9 +66,12 @@
         aria-label="Search products"
       />
 
-      <!-- Filled in by script.js from the categories found in products.json,
-           so adding a new category to the data file is enough — no HTML edits. -->
-      <div id="category-pills" class="category-pills"></div>
+      <!-- Filled in by script.js from the categories (and subcategories)
+           found in products.json, so adding a new one to the data file is
+           enough — no HTML edits. One .category-pills row per drill-down
+           level; renderCategoryPills() in script.js adds/removes whole
+           rows as you go deeper or pick "All". -->
+      <div id="category-pills" class="category-pill-rows"></div>
     </section>
 
     <!-- Filled in by script.js with one .product-card per item. -->
