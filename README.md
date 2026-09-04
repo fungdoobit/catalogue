@@ -66,19 +66,22 @@ Open `products.json` and edit the array. Each product looks like:
 omit `price`, or omit `video` entirely if a product doesn't have one.
 
 `video` (optional) is a short looping preview clip. Hover a card for
-0.7s on desktop and it fades in over the product photo, and the card
-grows slightly and lifts above its neighbors — a quick preview, not a
-link anywhere. It's skipped entirely on touch devices (there's no "hover
-and wait" gesture on a phone), and the video file itself isn't
-downloaded until someone actually hovers long enough to see it, so
-products without a video cost nothing extra and products with one don't
-load their clip on page load.
+0.7s on desktop and the video area fades in and grows taller (showing
+more of the frame than the square thumbnail crop), with the card lifted
+above its neighbors — a quick preview, not a link anywhere. It's skipped
+entirely on touch devices (there's no "hover and wait" gesture on a
+phone), and the video file itself isn't downloaded until someone
+actually hovers long enough to see it, so products without a video cost
+nothing extra and products with one don't load their clip on page load.
 
-The video always starts **muted** — browsers only allow autoplay *with*
-sound as a direct response to a real click, and a hover-then-wait
-doesn't count, even though it's genuine mouse input. A small speaker
-button appears in the corner of the video to turn sound on; clicking it
-is a real click, so it always works.
+It tries to play **with sound** immediately. Browsers only allow
+autoplay-with-sound as a direct response to specific gesture types (a
+real click or tap) — hover is deliberately excluded from that list, so
+pages can't blast audio just from a mouse passing over them. In
+practice this means a first-time visitor will likely see it fall back to
+muted automatically (the video still plays, just silently), with a small
+speaker button in the corner to turn sound on — clicking it is a real
+click, so that always works.
 
 Video files live in `videos/` and are referenced by a relative path
 (`"video": "videos/yourfile.mp4"`) — same idea as `og-image.png`, just

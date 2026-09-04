@@ -418,24 +418,19 @@ main {
   box-shadow: var(--shadow-card-hover);
 }
 
-/* Added by script.js alongside the video preview — grows the whole card
-   and lifts it above its neighbors, rather than the video popping out
-   into a separate floating element. `transform: scale()` is purely
-   visual and never affects layout, so the grid itself never reflows or
-   shifts; `z-index` just makes sure this card draws on top of the ones
-   next to it instead of being visually clipped by their edges.
+/* Added by script.js alongside the video preview. No transform/scale
+   here (that was an earlier version) — CSS transforms scale *all*
+   descendants too, so the card's own scale was compounding on top of
+   .product-video-overlay's independent growth below, making the video
+   balloon out wider than the card itself. Now the card only elevates
+   (z-index) and gets a bigger shadow; all of the actual size change
+   comes from the overlay growing on its own, so there's exactly one
+   source of "bigger" instead of two multiplying together.
    `overflow: visible` (overriding the card's normal overflow: hidden,
    which is what gives it rounded corners that clip its contents) is what
-   lets .product-video below spill past the card's own edges once it
-   grows bigger than its box.
-
-   Defined after .product-card:hover on purpose — same reasoning as the
-   .reveal utility earlier in this file: this and the hover rule have
-   identical specificity (two classes vs. one class + one pseudo-class),
-   so whichever is written later wins the tie. This needs to reliably win
-   so the "pop" always fully applies once triggered. */
+   lets the overlay spill past the card's own top/bottom edges once it
+   grows taller than its box. */
 .product-card.is-previewing {
-  transform: scale(1.18);
   z-index: 30;
   overflow: visible;
   box-shadow: 0 12px 20px rgba(0, 0, 0, 0.14), 0 32px 56px rgba(0, 0, 0, 0.2);
@@ -470,15 +465,21 @@ main {
   border-radius: var(--radius-card);
   overflow: hidden; /* clips the video to this wrapper's own rounded shape once it's bigger than image-wrap */
   opacity: 0;
-  transition: opacity 0.4s ease, inset 0.4s ease;
+  /* Same easing curve as the hero's rise-in animation, for one consistent
+     feel across the site. opacity and inset share this exact timing so
+     the fade and the grow read as one motion, not two out-of-sync ones. */
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), inset 0.45s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none; /* lets hover/click reach the card underneath; the mute button re-enables its own */
 }
 
 .product-video-overlay.is-visible {
   opacity: 1;
-  /* Taller than wide, since a typical vertical product-demo clip loses
-     more to a square crop top-to-bottom than side-to-side. */
-  inset: -22% -8%;
+  /* Grows taller only — left/right stay at 0, flush with the card's own
+     width, specifically so it can never end up wider than the card
+     around it. Vertical-only growth still reveals more of a typical
+     vertical product clip's frame, which is what was getting lost to the
+     square thumbnail crop in the first place. */
+  inset: -32% 0;
 }
 
 .product-video {

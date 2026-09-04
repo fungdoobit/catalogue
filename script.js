@@ -332,12 +332,14 @@ const ICON_UNMUTED =
   '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>';
 
 // Holding hover on a card fades in a short looping video over the static
-// image and grows the card slightly (via the "is-previewing" class — see
-// .product-card.is-previewing in styles.css) — a quick preview, not a
-// link to anywhere. Only wired up on devices with a real mouse
-// (supportsFineCursor, computed further down for the custom cursor too):
-// a touchscreen has no "hover and wait", just taps, so this would never
-// make sense to trigger there.
+// image, grown taller via the ".product-video-overlay.is-visible" state in
+// styles.css to show more of the frame, with the card itself elevated
+// above its neighbors (the "is-previewing" class) — a quick preview, not a
+// link to anywhere. Tries to play with sound; falls back to muted if the
+// browser blocks that (see the mouseenter handler below for why). Only
+// wired up on devices with a real mouse (supportsFineCursor, computed
+// further down for the custom cursor too): a touchscreen has no "hover and
+// wait", just taps, so this would never make sense to trigger there.
 function attachVideoPreview(card, imageWrap, videoUrl) {
   if (!supportsFineCursor) return;
 
@@ -352,24 +354,24 @@ function attachVideoPreview(card, imageWrap, videoUrl) {
 
   const video = document.createElement("video");
   video.className = "product-video";
-  video.muted = true; // required for autoplay — see the mute button below for how sound turns on
   video.loop = true;
   video.playsInline = true;
   video.preload = "none"; // don't fetch the file until someone actually hovers
   overlay.appendChild(video);
 
-  // Browsers only allow *unmuted* autoplay as a direct response to a real
-  // click — a hover doesn't qualify even though it's genuine mouse input,
-  // because by the time our timer fires it's no longer "directly" in
-  // response to anything. So the video always starts muted (guaranteed to
-  // actually play), and this button is how sound gets turned on: a real
-  // click always satisfies that requirement.
   const muteButton = document.createElement("button");
   muteButton.type = "button";
   muteButton.className = "product-video-mute";
-  muteButton.setAttribute("aria-label", "Unmute preview");
-  muteButton.innerHTML = ICON_MUTED;
   overlay.appendChild(muteButton);
+
+  // Keeps the button's icon and label in sync with the video's actual
+  // muted state, from wherever that state got set (a real click below, or
+  // the autoplay fallback further down).
+  function updateMuteButton() {
+    muteButton.innerHTML = video.muted ? ICON_MUTED : ICON_UNMUTED;
+    muteButton.setAttribute("aria-label", video.muted ? "Unmute preview" : "Mute preview");
+  }
+  updateMuteButton();
 
   muteButton.addEventListener("click", (event) => {
     // Without this, the click would also bubble up as a card mouse event —
@@ -377,8 +379,7 @@ function attachVideoPreview(card, imageWrap, videoUrl) {
     // ever accidentally triggering something added to the card later.
     event.stopPropagation();
     video.muted = !video.muted;
-    muteButton.innerHTML = video.muted ? ICON_MUTED : ICON_UNMUTED;
-    muteButton.setAttribute("aria-label", video.muted ? "Unmute preview" : "Mute preview");
+    updateMuteButton();
   });
 
   let hoverTimer = null;
@@ -390,10 +391,23 @@ function attachVideoPreview(card, imageWrap, videoUrl) {
       // enough to see it — not for every card on every page load.
       if (!video.src) video.src = videoUrl;
       video.currentTime = 0;
-      // play() returns a promise that rejects if the browser blocks
-      // autoplay for some reason — catching it just means "don't crash",
-      // the video simply won't appear in that edge case.
-      video.play().catch(() => {});
+
+      // Try for sound first. Browsers only allow *unmuted* autoplay as a
+      // direct response to specific gesture types (a real click or tap),
+      // and hover is deliberately excluded from that list — otherwise any
+      // page could blast audio just from a mouse passing over it. So this
+      // will likely be blocked on a visitor's first encounter with the
+      // site; when that happens, fall back to muted so the video still
+      // actually plays, just silently, with the button available to turn
+      // sound on with a real click (which always works).
+      video.muted = false;
+      updateMuteButton();
+      video.play().catch(() => {
+        video.muted = true;
+        updateMuteButton();
+        video.play().catch(() => {});
+      });
+
       overlay.classList.add("is-visible");
       muteButton.classList.add("is-visible");
       card.classList.add("is-previewing");
