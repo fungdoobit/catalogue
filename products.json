@@ -70,7 +70,8 @@
     "badge": "",
     "price": "",
     "link": "https://s.shopee.com.my/8V8fkBubvs",
-    "video": "videos/ugreen-powerbank-demo.mp4"
+    "video": "videos/ugreen-powerbank-demo.mp4",
+    "code": "ADJ-EKU-KHR"
   },
   {
     "name": "MOFT Snap Case for iPhone 17 Pro",
@@ -80,6 +81,17 @@
     "badge": "",
     "price": "",
     "link": "https://s.shopee.com.my/qjEcGO1Ik",
-    "video": "videos/moft-case-demo.mp4"
+    "video": "videos/moft-case-demo.mp4",
+    "code": "ATW-ENY-GAE"
+  },
+  {
+    "name": "Tapo CCTV (C211 / C200 / C200C / TC60)",
+    "image": "images/tapo-cctv.png",
+    "category": "Tech Accessories",
+    "badge": "",
+    "price": "",
+    "link": "https://s.shopee.com.my/8KpFhVVOqr",
+    "video": "videos/tapo-cctv-demo.mp4",
+    "code": "CEM-KPW-EJQ"
   }
 ]

@@ -59,13 +59,23 @@ Open `products.json` and edit the array. Each product looks like:
   "badge": "Top Pick",
   "price": "$19.99",
   "link": "https://your-affiliate-link.com",
-  "video": "https://example.com/preview.mp4"
+  "video": "https://example.com/preview.mp4",
+  "code": "ABC-123-XYZ"
 }
 ```
 
-`subcategory`, `badge`, `price`, and `video` are all optional — leave
-`badge` as `""`, omit `price`, or omit `subcategory`/`video` entirely if
-a product doesn't have one.
+`subcategory`, `badge`, `price`, `video`, and `code` are all optional —
+leave `badge` as `""`, omit `price`, or omit `subcategory`/`video`/`code`
+entirely if a product doesn't have one.
+
+### Discount/voucher codes
+
+`code` is a separate, secondary way to get the product — some Shopee
+listings pair an affiliate link with a code that gets typed in at
+checkout instead. When present, a "Copy code" button appears under "Get
+it →" (see `attachCopyCode()` in `script.js`); clicking it copies the
+code to the clipboard and briefly shows "Copied!" as confirmation. A
+product with no `code` just doesn't get the button at all.
 
 ### Subcategories (drill-down filtering)
 

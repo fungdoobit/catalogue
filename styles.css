@@ -168,9 +168,15 @@ body {
 }
 
 .hero-title {
-  font-size: clamp(2.5rem, 7vw, 4rem);
+  font-size: clamp(2.75rem, 8vw, 4.5rem);
   font-weight: 700;
   letter-spacing: -0.03em;
+  /* Its own entrance, separate from the shared rise-in below: on top of
+     the fade + rise, the letters start very slightly wider apart and
+     draw together into their final tight tracking as the title settles —
+     a small, one-time flourish that reads as "premium" without being
+     distracting, since it only ever happens once on page load. */
+  animation: hero-title-in 1s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .hero-subtitle {
@@ -215,7 +221,6 @@ body {
    *from* state applied before the animation starts (so there's no flash of
    the final, fully-visible position for a split second first) and the *to*
    state applied after it ends. */
-.hero-title,
 .hero-subtitle,
 .scroll-cue {
   animation: rise-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -260,6 +265,19 @@ body {
   }
 }
 
+@keyframes hero-title-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+    letter-spacing: 0.01em;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    letter-spacing: -0.03em;
+  }
+}
+
 @keyframes bob {
   0%, 100% {
     transform: translateY(0);
@@ -301,18 +319,27 @@ html.custom-cursor * {
   pointer-events: none; /* must never intercept clicks meant for the page underneath */
   z-index: 9999;
   opacity: 0; /* script.js reveals these on the first real mousemove */
+  /* mix-blend-mode: difference subtracts the cursor's own color from
+     whatever is underneath it, pixel by pixel — against white that yields
+     black, against black it yields white, and against anything in between
+     it yields whatever makes it stand out. A plain solid-color cursor
+     would have to pick one color and go invisible against its opposite
+     (a white cursor vanishing over a white background); this way it's
+     always legible everywhere on the page without needing to know what's
+     underneath it. */
+  mix-blend-mode: difference;
 }
 
 .cursor-dot {
   width: 8px;
   height: 8px;
-  background: var(--color-text);
+  background: #fff;
 }
 
 .cursor-tail {
   width: 32px;
   height: 32px;
-  border: 1.5px solid var(--color-text);
+  border: 1.5px solid #fff;
 }
 
 /* ==========================================================================
@@ -592,6 +619,28 @@ main {
   color: var(--color-badge-text);
   background: var(--color-badge-bg);
   border-radius: var(--radius-pill);
+  /* A quick, tiny pop rather than a fade — badges are small enough that a
+     fade alone barely registers, but a slight overshoot in scale reads
+     immediately as "this just appeared" without calling much attention to
+     itself. Plays alongside the card's own reveal-on-scroll entrance. */
+  animation: badge-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes badge-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge {
+    animation: none;
+  }
 }
 
 .product-info {
@@ -619,14 +668,20 @@ main {
   font-size: 0.95rem;
 }
 
+/* Holds "Get it" and, when a product has one, "Copy code" — see
+   attachCopyCode() in script.js. Stacked vertically: the affiliate link
+   is the primary action and reads first, the code is a secondary,
+   visually quieter option underneath it rather than competing for equal
+   weight. */
+.product-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 16px 16px;
+}
+
 .product-cta {
   display: block;
-  /* Now a direct child of .product-card rather than nested inside the
-     old padded .product-body wrapper (which no longer exists — that
-     padding is split between .product-info's top/sides and this margin),
-     so it needs its own spacing on all four sides to land in the same
-     visual place as before. */
-  margin: 10px 16px 16px;
   padding: 10px 16px;
   text-align: center;
   text-decoration: none;
@@ -647,6 +702,38 @@ main {
    feel like it has physical weight instead of just changing color. */
 .product-cta:active {
   transform: translateY(0);
+}
+
+/* Secondary action, deliberately quieter than .product-cta (outline
+   instead of filled) so it reads as an alternative, not a second primary
+   button competing for attention. */
+.product-copy-code {
+  display: block;
+  width: 100%;
+  padding: 9px 16px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+  font-family: inherit;
+  color: var(--color-text-muted);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+}
+
+.product-copy-code:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* Brief confirmation state after a successful copy — script.js swaps the
+   label to "Copied!" and adds this class, then reverts both after 1.5s. */
+.product-copy-code.is-copied {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: #fff;
 }
 
 .empty-state {

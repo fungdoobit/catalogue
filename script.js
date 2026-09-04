@@ -399,6 +399,12 @@ function buildProductCard(product) {
     attachVideoPreview(card, previewArea, product.video);
   }
 
+  // "Get it" (the affiliate link) and, when a product has one, "Copy code"
+  // sit side by side as two ways to act on a product — see
+  // attachCopyCode() below for what the code button actually does.
+  const actions = document.createElement("div");
+  actions.className = "product-actions";
+
   const cta = document.createElement("a");
   cta.className = "product-cta";
   cta.href = product.link;
@@ -406,9 +412,45 @@ function buildProductCard(product) {
   cta.target = "_blank";        // opens in a new tab
   cta.rel = "noopener noreferrer"; // security best practice for target="_blank" links:
                                     // stops the opened page from accessing window.opener
-  card.appendChild(cta);
+  actions.appendChild(cta);
+
+  // Optional per-product discount/voucher code, entirely separate from the
+  // link — products.json simply omits "code" for anything that doesn't
+  // have one.
+  if (product.code) {
+    attachCopyCode(actions, product.code);
+  }
+
+  card.appendChild(actions);
 
   return card;
+}
+
+// A small secondary button next to "Get it" that copies a product's code
+// to the clipboard, with the label itself flashing "Copied!" briefly as
+// the only feedback — no separate toast/alert needed for something this
+// low-stakes. navigator.clipboard is only available on secure contexts
+// (https, or localhost while testing), which GitHub Pages always is.
+function attachCopyCode(actions, code) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "product-copy-code";
+  button.textContent = `Copy code: ${code}`;
+
+  let resetTimer = null;
+  button.addEventListener("click", () => {
+    navigator.clipboard.writeText(code).then(() => {
+      button.textContent = "Copied!";
+      button.classList.add("is-copied");
+      clearTimeout(resetTimer);
+      resetTimer = setTimeout(() => {
+        button.textContent = `Copy code: ${code}`;
+        button.classList.remove("is-copied");
+      }, 1500);
+    });
+  });
+
+  actions.appendChild(button);
 }
 
 // How long you need to hold hover before the preview appears.
