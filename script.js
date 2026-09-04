@@ -321,21 +321,56 @@ function buildProductCard(product) {
   return card;
 }
 
-// Hovering a card for 1.5s fades in a short looping video over the static
-// image — a quick preview, not a link to anywhere. Only wired up on
-// devices with a real mouse (supportsFineCursor, computed once below for
-// the custom cursor too): a touchscreen has no "hover and wait", just taps,
-// so this would never make sense to trigger there.
+// How long you need to hold hover before the preview appears.
+const VIDEO_HOVER_DELAY_MS = 700;
+
+// Small inline icons for the mute button (same hand-written-SVG approach as
+// the scroll-cue arrow in the hero) — no icon library needed for two glyphs.
+const ICON_MUTED =
+  '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>';
+const ICON_UNMUTED =
+  '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>';
+
+// Holding hover on a card fades in a short looping video over the static
+// image and grows the card slightly (via the "is-previewing" class — see
+// .product-card.is-previewing in styles.css) — a quick preview, not a
+// link to anywhere. Only wired up on devices with a real mouse
+// (supportsFineCursor, computed further down for the custom cursor too):
+// a touchscreen has no "hover and wait", just taps, so this would never
+// make sense to trigger there.
 function attachVideoPreview(card, imageWrap, videoUrl) {
   if (!supportsFineCursor) return;
 
   const video = document.createElement("video");
   video.className = "product-video";
-  video.muted = true; // required for autoplay in every modern browser
+  video.muted = true; // required for autoplay — see the mute button below for how sound turns on
   video.loop = true;
   video.playsInline = true;
   video.preload = "none"; // don't fetch the file until someone actually hovers
   imageWrap.appendChild(video);
+
+  // Browsers only allow *unmuted* autoplay as a direct response to a real
+  // click — a hover doesn't qualify even though it's genuine mouse input,
+  // because by the time our timer fires it's no longer "directly" in
+  // response to anything. So the video always starts muted (guaranteed to
+  // actually play), and this button is how sound gets turned on: a real
+  // click always satisfies that requirement.
+  const muteButton = document.createElement("button");
+  muteButton.type = "button";
+  muteButton.className = "product-video-mute";
+  muteButton.setAttribute("aria-label", "Unmute preview");
+  muteButton.innerHTML = ICON_MUTED;
+  imageWrap.appendChild(muteButton);
+
+  muteButton.addEventListener("click", (event) => {
+    // Without this, the click would also bubble up as a card mouse event —
+    // harmless here today, but stopping it keeps this button's click from
+    // ever accidentally triggering something added to the card later.
+    event.stopPropagation();
+    video.muted = !video.muted;
+    muteButton.innerHTML = video.muted ? ICON_MUTED : ICON_UNMUTED;
+    muteButton.setAttribute("aria-label", video.muted ? "Unmute preview" : "Mute preview");
+  });
 
   let hoverTimer = null;
 
@@ -351,12 +386,16 @@ function attachVideoPreview(card, imageWrap, videoUrl) {
       // the video simply won't appear in that edge case.
       video.play().catch(() => {});
       video.classList.add("is-visible");
-    }, 1500);
+      muteButton.classList.add("is-visible");
+      card.classList.add("is-previewing");
+    }, VIDEO_HOVER_DELAY_MS);
   });
 
   card.addEventListener("mouseleave", () => {
     clearTimeout(hoverTimer);
     video.classList.remove("is-visible");
+    muteButton.classList.remove("is-visible");
+    card.classList.remove("is-previewing");
     video.pause();
   });
 }

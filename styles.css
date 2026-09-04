@@ -418,14 +418,32 @@ main {
   box-shadow: var(--shadow-card-hover);
 }
 
+/* Added by script.js alongside the video preview — grows the whole card
+   modestly and lifts it above its neighbors, rather than the video
+   popping out into a separate floating element. `transform: scale()` is
+   purely visual and never affects layout, so the grid itself never
+   reflows or shifts; `z-index` just makes sure this card draws on top of
+   the ones next to it instead of being visually clipped by their edges.
+
+   Defined after .product-card:hover on purpose — same reasoning as the
+   .reveal utility earlier in this file: this and the hover rule have
+   identical specificity (two classes vs. one class + one pseudo-class),
+   so whichever is written later wins the tie. This needs to reliably win
+   so the "pop" always fully applies once triggered. */
+.product-card.is-previewing {
+  transform: scale(1.08);
+  z-index: 30;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12), 0 24px 48px rgba(0, 0, 0, 0.16);
+}
+
 .product-image-wrap {
   aspect-ratio: 1 / 1;
   background: var(--color-bg);
-  position: relative; /* anchors .badge and .product-video to this box specifically, not the whole card */
+  position: relative; /* anchors .badge, .product-video and the mute button to this box specifically, not the whole card */
 }
 
 /* Only created by script.js for products that have a "video" field —
-   hovering the card for 1.5s fades this in over the static image (see
+   holding hover on the card fades this in over the static image (see
    attachVideoPreview() in script.js for the timing). pointer-events: none
    means your cursor still "sees" the card underneath for the hover/click
    itself; this is purely a visual layer on top. */
@@ -444,6 +462,39 @@ main {
 .product-video.is-visible {
   opacity: 1;
   transform: scale(1);
+}
+
+/* Videos always start muted (autoplay-with-sound only works right after
+   a real click, never a hover — see the comment in script.js), so this
+   is how sound actually gets turned on. Sits over the video, bottom
+   corner, and unlike .product-video itself it needs real pointer-events
+   since it's a button you click. */
+.product-video-mute {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, background-color 0.15s ease;
+}
+
+.product-video-mute:hover {
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.product-video-mute.is-visible {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .product-image-wrap img {

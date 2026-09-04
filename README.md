@@ -65,10 +65,24 @@ Open `products.json` and edit the array. Each product looks like:
 `badge`, `price`, and `video` are all optional — leave `badge` as `""`,
 omit `price`, or omit `video` entirely if a product doesn't have one.
 
-`video` (optional) is a short looping preview clip. Hover a card for 1.5s
-on desktop and it fades in over the product photo — a quick preview, not
-a link anywhere. It's skipped entirely on touch devices (there's no
-"hover and wait" gesture on a phone), and the video file itself isn't
+`video` (optional) is a short looping preview clip. Hover a card for
+0.7s on desktop and it fades in over the product photo, and the card
+grows slightly and lifts above its neighbors — a quick preview, not a
+link anywhere. It's skipped entirely on touch devices (there's no "hover
+and wait" gesture on a phone), and the video file itself isn't
 downloaded until someone actually hovers long enough to see it, so
 products without a video cost nothing extra and products with one don't
 load their clip on page load.
+
+The video always starts **muted** — browsers only allow autoplay *with*
+sound as a direct response to a real click, and a hover-then-wait
+doesn't count, even though it's genuine mouse input. A small speaker
+button appears in the corner of the video to turn sound on; clicking it
+is a real click, so it always works.
+
+Video files live in `videos/` and are referenced by a relative path
+(`"video": "videos/yourfile.mp4"`) — same idea as `og-image.png`, just
+committed straight into the repo rather than hosted elsewhere. Keep
+clips short (a few seconds) and reasonably small — a multi-megabyte file
+will feel sluggish appearing right at the hover threshold. MP4 (H.264)
+is the safest format for broad browser support.
