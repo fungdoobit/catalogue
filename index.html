@@ -49,6 +49,16 @@
   </section>
 
   <main>
+    <!-- Scroll-scrubbed text: script.js splits this into one <span> per
+         word and lights each one up based on how far you've scrolled
+         through .philosophy, not just once when it comes into view. See
+         .philosophy in styles.css for how the scroll range works. -->
+    <section class="philosophy" id="philosophy">
+      <div class="philosophy-inner">
+        <p class="philosophy-text" id="philosophy-text">I don't post everything I find. Every product here got tested, compared against alternatives, and earned its spot: no random drop-shipped filler, no pay-to-play placements. If it's listed, it's something I'd actually point a friend toward.</p>
+      </div>
+    </section>
+
     <!-- Search + category filters live together in one "controls" section
          so they visually read as one toolbar above the grid. -->
     <section class="controls">
@@ -75,6 +85,12 @@
   <footer class="site-footer">
     <p>As an affiliate, I may earn a commission from qualifying purchases.</p>
   </footer>
+
+  <!-- Custom cursor: two small elements script.js moves every animation
+       frame. Only ever shown on desktops with a real mouse — see the
+       feature check in script.js — so this is inert on phones/tablets. -->
+  <div class="cursor-dot" id="cursor-dot" aria-hidden="true"></div>
+  <div class="cursor-tail" id="cursor-tail" aria-hidden="true"></div>
 
   <script src="script.js"></script>
 </body>

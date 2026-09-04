@@ -233,6 +233,110 @@ body {
 }
 
 /* ==========================================================================
+   Philosophy: scroll-scrubbed text highlight
+   Unlike .reveal above (which plays once and is done), this section's
+   highlight state is tied directly to *how far* you've scrolled through
+   it — scroll halfway through the section, half the words are lit.
+   The wrapper is 200vh tall (double a normal screen) purely to create
+   scrollable distance to scrub through; the inner content is `sticky`,
+   so it stays pinned in place on screen for that entire 200vh while the
+   page scrolls underneath it — same sticky trick as .site-nav, just used
+   to hold something still instead of slide something in.
+   ========================================================================== */
+.philosophy {
+  min-height: 200vh;
+  position: relative;
+}
+
+.philosophy-inner {
+  position: sticky;
+  top: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.philosophy-text {
+  max-width: 720px;
+  font-size: clamp(1.4rem, 3.2vw, 2.1rem);
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+  letter-spacing: -0.01em;
+}
+
+/* script.js wraps every word in one of these. Unlit words use the same
+   muted gray as secondary text elsewhere on the page, not a near-invisible
+   one — the point is a reading progression, not a puzzle. */
+.philosophy-text .word {
+  color: var(--color-text-muted);
+  transition: color 0.2s ease;
+}
+
+.philosophy-text .word.is-active {
+  color: var(--color-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Scroll-scrubbing is inherently a motion effect, so reduced-motion
+     visitors get the plain, fully-readable paragraph instead — normal
+     document flow, no pinning, every word already in its final color. */
+  .philosophy {
+    min-height: 0;
+  }
+
+  .philosophy-inner {
+    position: static;
+    min-height: 0;
+    padding: 64px 24px;
+  }
+
+  .philosophy-text .word {
+    color: var(--color-text);
+    transition: none;
+  }
+}
+
+/* ==========================================================================
+   Custom cursor
+   Two fixed-position elements script.js repositions every animation
+   frame — this file only defines their appearance, never their position
+   (that's entirely inline styles from JS, recalculated 60 times a second).
+   html.custom-cursor is added by script.js only on devices with a real
+   mouse and no reduced-motion preference; without that class these two
+   elements just sit invisible and unused, and the real cursor is untouched.
+   ========================================================================== */
+html.custom-cursor,
+html.custom-cursor * {
+  cursor: none;
+}
+
+.cursor-dot,
+.cursor-tail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  border-radius: 50%;
+  pointer-events: none; /* must never intercept clicks meant for the page underneath */
+  z-index: 9999;
+  opacity: 0; /* script.js reveals these on the first real mousemove */
+}
+
+.cursor-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--color-text);
+}
+
+.cursor-tail {
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid var(--color-text);
+}
+
+/* ==========================================================================
    Controls: search bar + category pills
    ========================================================================== */
 main {

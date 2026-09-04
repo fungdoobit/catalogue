@@ -60,6 +60,130 @@ navObserver.observe(heroEl);
 // fade/rise treatment as the cards for a consistent feel.
 observeReveal(controlsEl, 0);
 
+// ---------------------------------------------------------------------
+// Philosophy section: scroll-scrubbed word highlight
+// Unlike observeReveal above (which is a one-time "has this scrolled into
+// view yet?" check), this needs a continuous 0-1 progress value tied to
+// scroll position, so it reads its own layout directly with
+// getBoundingClientRect() instead of using IntersectionObserver.
+// ---------------------------------------------------------------------
+const philosophyEl = document.getElementById("philosophy");
+const philosophyTextEl = document.getElementById("philosophy-text");
+
+// Split the paragraph into one <span class="word"> per word, so each word
+// can be colored independently. This is safe to do with innerHTML here
+// specifically because the text is our own hard-coded copy in index.html,
+// not data from products.json or any other untrusted source.
+const philosophyWords = philosophyTextEl.textContent.trim().split(/\s+/);
+philosophyTextEl.innerHTML = philosophyWords
+  .map((word) => `<span class="word">${word}</span>`)
+  .join(" ");
+const wordEls = philosophyTextEl.querySelectorAll(".word");
+
+function updatePhilosophyHighlight() {
+  const rect = philosophyEl.getBoundingClientRect();
+  // .philosophy is 200vh tall with its inner content pinned via `sticky`,
+  // so this scroll range is exactly one viewport-height's worth (200vh of
+  // section minus the 100vh it's pinned for). progress goes from 0 (the
+  // section's top has just reached the top of the viewport) to 1 (its
+  // bottom is about to leave the bottom of the viewport).
+  const scrollable = rect.height - window.innerHeight;
+  const progress = scrollable > 0 ? Math.min(Math.max(-rect.top / scrollable, 0), 1) : 1;
+
+  const litCount = Math.round(progress * wordEls.length);
+  wordEls.forEach((word, i) => {
+    word.classList.toggle("is-active", i < litCount);
+  });
+}
+
+let philosophyTicking = false;
+window.addEventListener("scroll", () => {
+  if (philosophyTicking) return;
+  philosophyTicking = true;
+  requestAnimationFrame(() => {
+    updatePhilosophyHighlight();
+    philosophyTicking = false;
+  });
+});
+updatePhilosophyHighlight(); // correct state immediately, e.g. on a page refresh mid-scroll
+
+// ---------------------------------------------------------------------
+// Custom cursor: a small dot that snaps exactly to the mouse every frame
+// (the "pivot"), plus a larger ring that only ever closes a fraction of
+// the remaining distance to the mouse each frame — that's what makes it
+// lag behind. How far behind it currently is also drives a stretch +
+// rotation toward the direction of travel, so it "flings" when you move
+// fast and relaxes back into a plain circle once it catches up.
+//
+// matchMedia("(hover: hover) and (pointer: fine)") is how you detect "this
+// is a real mouse", not a touchscreen — touch devices report hover:none,
+// so this whole block is simply skipped there and the OS cursor (which
+// doesn't exist on touch anyway) is never touched. Reduced-motion visitors
+// are skipped too, since the whole point of this effect is motion.
+// ---------------------------------------------------------------------
+const supportsFineCursor = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+if (supportsFineCursor && !prefersReducedMotion) {
+  document.documentElement.classList.add("custom-cursor");
+
+  const dotEl = document.getElementById("cursor-dot");
+  const tailEl = document.getElementById("cursor-tail");
+
+  let mouseX = window.innerWidth / 2;
+  let mouseY = window.innerHeight / 2;
+  let tailX = mouseX;
+  let tailY = mouseY;
+  let cursorRevealed = false;
+
+  window.addEventListener("mousemove", (event) => {
+    mouseX = event.clientX;
+    mouseY = event.clientY;
+    // Wait for real mouse movement before showing anything, so there's no
+    // stray dot sitting at the center of the screen before you've touched
+    // the mouse at all.
+    if (!cursorRevealed) {
+      cursorRevealed = true;
+      dotEl.style.opacity = "1";
+      tailEl.style.opacity = "0.5";
+    }
+  });
+
+  function animateCursor() {
+    // -4px / -16px center each element on the mouse position: they're
+    // positioned by their top-left corner by default, so this shifts each
+    // one back by exactly half its own width/height (8px and 32px, from
+    // the CSS) rather than letting the mouse point sit at their corner.
+    dotEl.style.transform = `translate3d(${mouseX - 4}px, ${mouseY - 4}px, 0)`;
+
+    // Linear interpolation ("lerp"): move the tail 15% of the remaining
+    // distance to the mouse, every frame, instead of jumping straight to
+    // it. Repeated every frame, that produces smooth chasing motion — the
+    // classic technique behind any "trailing" cursor or cursor-follower.
+    tailX += (mouseX - tailX) * 0.15;
+    tailY += (mouseY - tailY) * 0.15;
+
+    // How far behind the tail currently is becomes the "fling": far behind
+    // (moving fast) means a longer stretch angled toward the direction of
+    // travel; caught up (barely moving) means effectively a plain circle.
+    const dx = mouseX - tailX;
+    const dy = mouseY - tailY;
+    const lag = Math.min(Math.sqrt(dx * dx + dy * dy), 60);
+    const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+    const stretch = 1 + lag / 40;
+
+    // Squishing the perpendicular axis by 1/sqrt(stretch) as the other
+    // axis stretches keeps the shape's apparent area roughly constant —
+    // it reads as an elastic blob being pulled, not just growing overall.
+    tailEl.style.transform =
+      `translate3d(${tailX - 16}px, ${tailY - 16}px, 0) ` +
+      `rotate(${angle}deg) scale(${stretch}, ${1 / Math.sqrt(stretch)})`;
+
+    requestAnimationFrame(animateCursor);
+  }
+  requestAnimationFrame(animateCursor);
+}
+
 init();
 
 async function init() {
