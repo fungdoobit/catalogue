@@ -419,11 +419,15 @@ main {
 }
 
 /* Added by script.js alongside the video preview — grows the whole card
-   modestly and lifts it above its neighbors, rather than the video
-   popping out into a separate floating element. `transform: scale()` is
-   purely visual and never affects layout, so the grid itself never
-   reflows or shifts; `z-index` just makes sure this card draws on top of
-   the ones next to it instead of being visually clipped by their edges.
+   and lifts it above its neighbors, rather than the video popping out
+   into a separate floating element. `transform: scale()` is purely
+   visual and never affects layout, so the grid itself never reflows or
+   shifts; `z-index` just makes sure this card draws on top of the ones
+   next to it instead of being visually clipped by their edges.
+   `overflow: visible` (overriding the card's normal overflow: hidden,
+   which is what gives it rounded corners that clip its contents) is what
+   lets .product-video below spill past the card's own edges once it
+   grows bigger than its box.
 
    Defined after .product-card:hover on purpose — same reasoning as the
    .reveal utility earlier in this file: this and the hover rule have
@@ -431,9 +435,10 @@ main {
    so whichever is written later wins the tie. This needs to reliably win
    so the "pop" always fully applies once triggered. */
 .product-card.is-previewing {
-  transform: scale(1.08);
+  transform: scale(1.18);
   z-index: 30;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12), 0 24px 48px rgba(0, 0, 0, 0.16);
+  overflow: visible;
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.14), 0 32px 56px rgba(0, 0, 0, 0.2);
 }
 
 .product-image-wrap {
@@ -444,31 +449,49 @@ main {
 
 /* Only created by script.js for products that have a "video" field —
    holding hover on the card fades this in over the static image (see
-   attachVideoPreview() in script.js for the timing). pointer-events: none
-   means your cursor still "sees" the card underneath for the hover/click
-   itself; this is purely a visual layer on top. */
+   attachVideoPreview() in script.js for the timing). Groups the video
+   and its mute button together so they grow as one unit — the button
+   stays correctly anchored to this wrapper's actual corner no matter how
+   big it gets, rather than being anchored to the original small square
+   and drifting out of position as the video grows past it.
+
+   inset: 0 at rest exactly matches the static image beneath it (the
+   square thumbnail crop). Growing to negative inset values in
+   .is-visible below is what reveals more of the original video frame
+   instead of staying locked to that same tight square — this wrapper
+   gets bigger than its own box, which .product-card.is-previewing above
+   allows it to do without being clipped. It's this wrapper that grows,
+   not .product-image-wrap itself, specifically so the card's actual
+   layout size (and therefore the grid around it) never changes — only
+   this one absolutely-positioned, already-out-of-flow element does. */
+.product-video-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-card);
+  overflow: hidden; /* clips the video to this wrapper's own rounded shape once it's bigger than image-wrap */
+  opacity: 0;
+  transition: opacity 0.4s ease, inset 0.4s ease;
+  pointer-events: none; /* lets hover/click reach the card underneath; the mute button re-enables its own */
+}
+
+.product-video-overlay.is-visible {
+  opacity: 1;
+  /* Taller than wide, since a typical vertical product-demo clip loses
+     more to a square crop top-to-bottom than side-to-side. */
+  inset: -22% -8%;
+}
+
 .product-video {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0;
-  transform: scale(1.03);
-  transition: opacity 0.4s ease, transform 0.4s ease;
-  pointer-events: none;
-}
-
-.product-video.is-visible {
-  opacity: 1;
-  transform: scale(1);
 }
 
 /* Videos always start muted (autoplay-with-sound only works right after
    a real click, never a hover — see the comment in script.js), so this
-   is how sound actually gets turned on. Sits over the video, bottom
-   corner, and unlike .product-video itself it needs real pointer-events
-   since it's a button you click. */
+   is how sound actually gets turned on. */
 .product-video-mute {
   position: absolute;
   bottom: 10px;

@@ -341,13 +341,22 @@ const ICON_UNMUTED =
 function attachVideoPreview(card, imageWrap, videoUrl) {
   if (!supportsFineCursor) return;
 
+  // The video and its mute button live inside this shared wrapper (rather
+  // than directly in imageWrap) so they grow together as one unit — see
+  // .product-video-overlay in styles.css for why that matters: it's what
+  // keeps the mute button correctly anchored to the video's actual corner
+  // even as the video grows past its original square.
+  const overlay = document.createElement("div");
+  overlay.className = "product-video-overlay";
+  imageWrap.appendChild(overlay);
+
   const video = document.createElement("video");
   video.className = "product-video";
   video.muted = true; // required for autoplay — see the mute button below for how sound turns on
   video.loop = true;
   video.playsInline = true;
   video.preload = "none"; // don't fetch the file until someone actually hovers
-  imageWrap.appendChild(video);
+  overlay.appendChild(video);
 
   // Browsers only allow *unmuted* autoplay as a direct response to a real
   // click — a hover doesn't qualify even though it's genuine mouse input,
@@ -360,7 +369,7 @@ function attachVideoPreview(card, imageWrap, videoUrl) {
   muteButton.className = "product-video-mute";
   muteButton.setAttribute("aria-label", "Unmute preview");
   muteButton.innerHTML = ICON_MUTED;
-  imageWrap.appendChild(muteButton);
+  overlay.appendChild(muteButton);
 
   muteButton.addEventListener("click", (event) => {
     // Without this, the click would also bubble up as a card mouse event —
@@ -385,7 +394,7 @@ function attachVideoPreview(card, imageWrap, videoUrl) {
       // autoplay for some reason — catching it just means "don't crash",
       // the video simply won't appear in that edge case.
       video.play().catch(() => {});
-      video.classList.add("is-visible");
+      overlay.classList.add("is-visible");
       muteButton.classList.add("is-visible");
       card.classList.add("is-previewing");
     }, VIDEO_HOVER_DELAY_MS);
@@ -393,7 +402,7 @@ function attachVideoPreview(card, imageWrap, videoUrl) {
 
   card.addEventListener("mouseleave", () => {
     clearTimeout(hoverTimer);
-    video.classList.remove("is-visible");
+    overlay.classList.remove("is-visible");
     muteButton.classList.remove("is-visible");
     card.classList.remove("is-previewing");
     video.pause();
