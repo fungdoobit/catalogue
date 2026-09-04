@@ -410,7 +410,33 @@ main {
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
   overflow: hidden;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  /* Hints the browser to keep this element on its own stable compositing
+     layer at all times, rather than promoting/demoting it to one exactly
+     when a transform/box-shadow transition starts and ends (triggered
+     here by z-index changing on .is-previewing). That promotion has a
+     real cost — a brief stall while the browser restructures layers —
+     which otherwise lands right at the start of the animation and reads
+     as a stutter before the motion catches up. */
+  will-change: transform, box-shadow;
+  /* This one shared duration/easing is used for both the small plain
+     hover lift below and the bigger preview pop further down — on
+     purpose. A CSS transition only ever uses whichever `transition`
+     value applies to the *new* state at the moment a property changes,
+     so when .is-previewing used to declare its own separate (slower)
+     transition, that only applied going *in* — removing the class on
+     mouseleave fell back to this rule's old, much faster 0.15s, and the
+     card would grow in smoothly but snap back abruptly. Keeping one
+     value here makes every transform change — in or out, small or big —
+     animate identically both ways.
+
+     cubic-bezier(0.33, 1, 0.68, 1) ("ease-out-cubic") eases steadily
+     across the whole duration rather than front-loading almost all of
+     the motion into the first fraction of it — that front-loaded shape
+     is what the hero text entrance elsewhere in this file uses, which
+     suits a quick, snappy reveal, but stretched over this pop's longer
+     0.4s it read as a sudden jerk followed by a long, barely-moving
+     tail rather than one fluid motion. */
+  transition: transform 0.4s cubic-bezier(0.33, 1, 0.68, 1), box-shadow 0.4s cubic-bezier(0.33, 1, 0.68, 1);
 }
 
 .product-card:hover {
@@ -427,15 +453,12 @@ main {
    video overlay, text, all still under the card's own overflow: hidden —
    scales together, rounded corners and clipping stay correct throughout,
    so unlike an earlier version this doesn't need overflow: visible at
-   all. Sets its own transition (slower than the base card's 0.15s hover
-   lift, and matching .product-video-overlay's fade below) so the scale
-   and the video fade read as one coordinated motion, not two racing
-   animations finishing at different times. */
+   all. No transition declared here — it inherits the shared one above,
+   which is exactly what fixes the smooth-in-but-snaps-back-out problem. */
 .product-card.is-previewing {
   transform: scale(1.15);
   z-index: 30;
   box-shadow: 0 12px 20px rgba(0, 0, 0, 0.14), 0 32px 56px rgba(0, 0, 0, 0.2);
-  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Everything except the "Get it" button — see the comment above
@@ -466,9 +489,10 @@ main {
   position: absolute;
   inset: 0;
   opacity: 0;
-  /* Same easing curve as the hero's rise-in animation, for one consistent
-     feel across the site. */
-  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Matches .product-card's transition exactly (same duration and easing
+     curve) so the video fading in and the card scaling up read as one
+     coordinated motion rather than two separately-timed ones. */
+  transition: opacity 0.4s cubic-bezier(0.33, 1, 0.68, 1);
   pointer-events: none; /* lets hover/click reach the card underneath; the mute button re-enables its own */
 }
 
@@ -504,7 +528,9 @@ main {
   cursor: pointer;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease, background-color 0.15s ease;
+  /* opacity matches the overlay/card timing above; background-color stays
+     quick since that's a separate, smaller hover micro-interaction. */
+  transition: opacity 0.4s cubic-bezier(0.33, 1, 0.68, 1), background-color 0.15s ease;
 }
 
 .product-video-mute:hover {
