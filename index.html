@@ -21,15 +21,32 @@
 </head>
 <body>
 
-  <!-- id="site-header" is how script.js finds this element to toggle the
-       "is-scrolled" class on it as you scroll (see the header shrink
-       effect in styles.css). -->
-  <header class="site-header" id="site-header">
-    <div class="header-inner">
-      <h1 class="site-title">Picked &amp; Packed</h1>
-      <p class="site-tagline">A few things worth buying, hand-picked by me.</p>
-    </div>
+  <!-- This slim bar is hidden above the viewport at first (see
+       .site-nav in styles.css). script.js watches #hero below with an
+       IntersectionObserver and slides this into view only once the hero
+       has scrolled fully out of sight — so it stays out of the way during
+       the entrance, then acts as a persistent "you're on this site" anchor
+       while browsing the grid. -->
+  <header class="site-nav" id="site-nav">
+    <p class="site-nav-title">Picked &amp; Packed</p>
   </header>
+
+  <!-- The entrance: fills the screen on load with just the name and
+       tagline, no search bar or grid competing for attention yet.
+       Scrolling past this is what reveals the actual site below — see
+       .hero in styles.css for the on-load animation. -->
+  <section class="hero" id="hero">
+    <h1 class="hero-title">Picked &amp; Packed</h1>
+    <p class="hero-tagline">A few things worth buying, hand-picked by me.</p>
+    <div class="scroll-cue" aria-hidden="true">
+      <span>Scroll to explore</span>
+      <span class="scroll-cue-arrow">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 6l5 5 5-5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </span>
+    </div>
+  </section>
 
   <main>
     <!-- Search + category filters live together in one "controls" section

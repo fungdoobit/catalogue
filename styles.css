@@ -21,6 +21,12 @@
   --shadow-card-hover: 0 4px 10px rgba(0, 0, 0, 0.08), 0 16px 32px rgba(0, 0, 0, 0.08);
 
   --max-width: 1080px;
+  /* .site-nav is position: fixed, which means (unlike sticky) it never
+     reserves space in the page's normal flow — nothing below it "knows"
+     it's there. This value is used both to size that bar and to pad the
+     content below it, so the two stay in sync instead of the nav
+     silently overlapping whatever scrolls underneath it. */
+  --nav-height: 56px;
 }
 
 /* A simple reset: browsers apply inconsistent default margins/box-sizing,
@@ -53,65 +59,177 @@ body {
 }
 
 /* ==========================================================================
-   Header
-   `position: sticky` keeps it pinned to the top once you scroll past it —
-   unlike `fixed`, it stays in the normal document flow until then, so it
-   doesn't need extra top-padding hacks on the content below it. script.js
-   adds/removes the "is-scrolled" class, and this CSS just reacts to that
-   class — the JS never touches layout or styling directly.
+   Scroll reveal (defined early on purpose — see the note below)
+   script.js adds the "reveal" class to an element, then adds "is-visible"
+   once an IntersectionObserver reports it has scrolled into view — that's
+   what actually triggers this transition. Elements start invisible/shifted
+   down and settle into place as you scroll to them.
+
+   Why this block lives up here instead of near the components that use it:
+   .reveal.is-visible and, say, .product-card:hover both set `transform`,
+   and both selectors have identical specificity (two classes vs. one class
+   + one pseudo-class). When specificity ties, CSS falls back to *source
+   order* — whichever rule is written later in the file wins. Keeping this
+   generic "reveal" utility early means every component-specific rule below
+   it (like the card hover lift) naturally wins that tie-break, so hovering
+   a still-settling card doesn't get silently overridden by its own
+   entrance animation.
    ========================================================================== */
-.site-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: var(--color-bg);
-  padding: 64px 24px 32px;
-  transition: padding 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
-.site-header.is-scrolled {
-  padding: 14px 24px;
-  /* A translucent background + blur is the same "frosted glass" trick
-     Apple's own nav bars use — content peeks through faintly as it
-     scrolls underneath. -webkit- prefix is still needed for Safari. */
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ==========================================================================
+   Compact nav bar
+   Sits fixed at the very top, but starts translated up out of view.
+   script.js toggles "is-visible" once the hero below has scrolled fully
+   out of the viewport, so this only appears once you're past the entrance.
+   ========================================================================== */
+.site-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  height: var(--nav-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24px;
+  text-align: center;
+  /* Same frosted-glass trick as Apple's own nav bars: a translucent
+     background + blur so content peeks through faintly underneath.
+     -webkit- prefix is still needed for Safari. */
   background: rgba(250, 250, 250, 0.75);
   backdrop-filter: saturate(180%) blur(14px);
   -webkit-backdrop-filter: saturate(180%) blur(14px);
   box-shadow: 0 1px 0 var(--color-border);
+  transform: translateY(-100%);
+  transition: transform 0.3s ease;
 }
 
-.header-inner {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  text-align: center;
+.site-nav.is-visible {
+  transform: translateY(0);
 }
 
-.site-title {
-  font-size: clamp(2rem, 5vw, 2.75rem);
+.site-nav-title {
   font-weight: 700;
-  letter-spacing: -0.02em;
-  transition: font-size 0.3s ease;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
 }
 
-.is-scrolled .site-title {
-  font-size: 1.25rem;
+/* ==========================================================================
+   Hero / entrance
+   min-height (not height) so a longer tagline is never clipped. `svh`
+   ("small viewport height") is used instead of `vh` because mobile Safari
+   counts `vh` as if the address bar were hidden — using `vh` there makes
+   the hero taller than the visible screen until you scroll once. `svh`
+   accounts for the address bar from the start.
+   ========================================================================== */
+.hero {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  gap: 12px;
+  position: relative;
 }
 
-.site-tagline {
-  margin-top: 8px;
+.hero-title {
+  font-size: clamp(2.5rem, 7vw, 4rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.hero-tagline {
   color: var(--color-text-muted);
-  font-size: 1.1rem;
-  max-height: 40px;
-  overflow: hidden;
-  transition: opacity 0.25s ease, max-height 0.3s ease, margin-top 0.3s ease;
+  font-size: 1.15rem;
 }
 
-/* The tagline collapses away (rather than just fading) once the header is
-   in its compact state, so it doesn't leave empty space behind. */
-.is-scrolled .site-tagline {
-  opacity: 0;
-  max-height: 0;
-  margin-top: 0;
+/* Plays once, on page load — this is the "entrance". `both` as the fourth
+   value in the shorthand is animation-fill-mode: both, which keeps the
+   *from* state applied before the animation starts (so there's no flash of
+   the final, fully-visible position for a split second first) and the *to*
+   state applied after it ends. */
+.hero-title,
+.hero-tagline,
+.scroll-cue {
+  animation: rise-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hero-tagline {
+  animation-delay: 0.15s;
+}
+
+.scroll-cue {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  animation-delay: 0.4s;
+}
+
+/* The bobbing motion lives on the inner arrow, not .scroll-cue itself,
+   because .scroll-cue already animates `transform` once for its entrance —
+   putting a second, infinite `transform` animation on the very same
+   element would just fight the first one instead of combining with it. */
+.scroll-cue-arrow {
+  display: inline-flex;
+  animation: bob 2s ease-in-out infinite;
+  animation-delay: 1.2s;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bob {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-title,
+  .hero-tagline,
+  .scroll-cue,
+  .scroll-cue-arrow {
+    animation: none;
+  }
 }
 
 /* ==========================================================================
@@ -120,7 +238,10 @@ body {
 main {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 0 24px 64px;
+  /* Extra top padding equal to --nav-height reserves room for the fixed
+     nav bar so it never overlaps the search bar once it slides into
+     view — see the --nav-height comment in the design tokens above. */
+  padding: calc(24px + var(--nav-height)) 24px 64px;
 }
 
 .controls {
@@ -304,34 +425,6 @@ main {
 }
 
 /* ==========================================================================
-   Scroll reveal
-   script.js adds the "reveal" class to each card as it's created, then
-   adds "is-visible" once an IntersectionObserver reports the card has
-   scrolled into view — that's what actually triggers this transition.
-   Cards below the fold start invisible/shifted-down and settle into
-   place as you scroll to them, which is where the "premium" feel mostly
-   comes from. Reduced-motion users skip straight to the end state.
-   ========================================================================== */
-.reveal {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-
-.reveal.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .reveal {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-}
-
-/* ==========================================================================
    Footer
    ========================================================================== */
 .site-footer {
@@ -350,10 +443,6 @@ main {
    — the header padding and title size feel too large on a phone otherwise.
    ========================================================================== */
 @media (max-width: 480px) {
-  .site-header {
-    padding: 40px 20px 24px;
-  }
-
   .product-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 16px;

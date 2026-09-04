@@ -17,7 +17,9 @@ const gridEl = document.getElementById("product-grid");
 const pillsEl = document.getElementById("category-pills");
 const searchInputEl = document.getElementById("search-input");
 const emptyStateEl = document.getElementById("empty-state");
-const headerEl = document.getElementById("site-header");
+const heroEl = document.getElementById("hero");
+const navEl = document.getElementById("site-nav");
+const controlsEl = document.querySelector(".controls");
 
 // Watches "reveal" elements (the product cards) and adds "is-visible" once
 // each one scrolls into the viewport — styles.css does the actual fade/rise
@@ -43,21 +45,20 @@ function observeReveal(el, index) {
   revealObserver.observe(el);
 }
 
-// The scroll listener below can fire many times per second (every pixel of
-// scroll, on some browsers/trackpads). requestAnimationFrame + this
-// "ticking" flag means the class-toggle work only actually runs once per
-// animation frame at most, instead of on every single scroll event —
-// otherwise this would waste work re-checking the same thing dozens of
-// times before the screen even repaints.
-let scrollTicking = false;
-window.addEventListener("scroll", () => {
-  if (scrollTicking) return;
-  scrollTicking = true;
-  requestAnimationFrame(() => {
-    headerEl.classList.toggle("is-scrolled", window.scrollY > 24);
-    scrollTicking = false;
-  });
+// Shows the compact nav bar once the hero has scrolled fully out of the
+// viewport (entry.isIntersecting becomes false), and hides it again if you
+// scroll back up to the hero. This reuses the same IntersectionObserver
+// technique as the card reveals above, just watching one element instead
+// of many, so the nav only appears once the entrance is actually over.
+const navObserver = new IntersectionObserver(([entry]) => {
+  navEl.classList.toggle("is-visible", !entry.isIntersecting);
 });
+navObserver.observe(heroEl);
+
+// The controls (search + pills) sit just below the hero, so they're what
+// scrolling past the entrance reveals first — give them the same
+// fade/rise treatment as the cards for a consistent feel.
+observeReveal(controlsEl, 0);
 
 init();
 
