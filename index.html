@@ -8,20 +8,14 @@
 
   <!-- Open Graph tags: these control how the page looks when pasted into
        Slack, WhatsApp, iMessage, etc. Without them, a shared link just
-       shows a bare URL and maybe a random screenshot.
-
-       og:image must be an absolute URL (crawlers fetch it separately from
-       the page, so a relative path or data: URI won't work) — it's set to
-       a placeholder here since the real domain isn't known until you
-       deploy. Update it to your live URL, e.g.
-       https://yourusername.github.io/catalogue/og-image.png — after
-       deploying (see README). og-image.png itself is a real file
-       committed in this repo, not a third-party image service, so it
-       always loads with no external dependency. -->
+       shows a bare URL and maybe a random screenshot. og:image is a real
+       file committed in this repo (og-image.png), not a third-party image
+       service, so it always loads with no external dependency. -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Picked & Packed — Curated Finds" />
   <meta property="og:description" content="A small, hand-picked collection of products worth buying — no clutter, no ads, just things I actually like." />
-  <meta property="og:image" content="https://REPLACE-WITH-YOUR-DEPLOYED-DOMAIN/og-image.png" />
+  <meta property="og:url" content="https://fungdoobit.github.io/catalogue/" />
+  <meta property="og:image" content="https://fungdoobit.github.io/catalogue/og-image.png" />
 
   <link rel="stylesheet" href="styles.css" />
 </head>

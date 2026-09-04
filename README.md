@@ -3,6 +3,8 @@
 A small, static, Apple-style curated product link page. Plain HTML/CSS/JS —
 no build step, no frameworks, no backend.
 
+**Live at:** https://fungdoobit.github.io/catalogue/
+
 ## Files
 
 - `index.html` — page structure
@@ -38,12 +40,11 @@ Then open **http://localhost:8000** in your browser.
 That's it — totally free, and it updates automatically every time you push
 to that branch.
 
-6. Once you know your live URL, open `index.html` and update the
-   `og:image` meta tag to point at it, e.g.
-   `https://yourusername.github.io/catalogue/og-image.png`. This makes
-   links look good when pasted into Slack/WhatsApp/iMessage. (It has to
-   be the full live URL — those apps fetch the image separately, they
-   can't use a relative path.)
+The `og:url`/`og:image` tags in `index.html` are already pointed at the
+live URL above. If you ever rename the repo or move it under a different
+account, update those two tags to match the new URL — those apps fetch
+the image separately, so it has to be the real live URL, not a relative
+path.
 
 ## Editing products
 
