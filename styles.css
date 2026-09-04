@@ -171,12 +171,13 @@ body {
   font-size: clamp(2.75rem, 8vw, 4.5rem);
   font-weight: 700;
   letter-spacing: -0.03em;
-  /* Its own entrance, separate from the shared rise-in below: on top of
-     the fade + rise, the letters start very slightly wider apart and
-     draw together into their final tight tracking as the title settles —
-     a small, one-time flourish that reads as "premium" without being
-     distracting, since it only ever happens once on page load. */
-  animation: hero-title-in 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+  /* Its own entrance, separate from the shared rise-in below: it starts
+     visibly smaller, softly out of focus, and spaced wide open, then
+     grows, sharpens, and draws its letters together into their final
+     tight tracking as it settles — a slower, more deliberate flourish
+     than the plain fade+rise everything else gets, since this is the
+     first thing anyone sees. */
+  animation: hero-title-in 1.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .hero-subtitle {
@@ -268,13 +269,15 @@ body {
 @keyframes hero-title-in {
   from {
     opacity: 0;
-    transform: translateY(24px) scale(0.96);
-    letter-spacing: 0.01em;
+    transform: translateY(36px) scale(0.85);
+    letter-spacing: 0.1em;
+    filter: blur(8px);
   }
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
     letter-spacing: -0.03em;
+    filter: blur(0);
   }
 }
 
