@@ -1,4 +1,4 @@
-# Picked & Packed
+# Catalogue No. 01
 
 A small, static, Apple-style curated product link page. Plain HTML/CSS/JS —
 no build step, no frameworks, no backend.

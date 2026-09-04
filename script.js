@@ -61,51 +61,46 @@ navObserver.observe(heroEl);
 observeReveal(controlsEl, 0);
 
 // ---------------------------------------------------------------------
-// Philosophy section: scroll-scrubbed word highlight
+// Hero subtitle: scroll-scrubbed word highlight
 // Unlike observeReveal above (which is a one-time "has this scrolled into
 // view yet?" check), this needs a continuous 0-1 progress value tied to
-// scroll position, so it reads its own layout directly with
-// getBoundingClientRect() instead of using IntersectionObserver.
+// scroll position. Rather than reserving a separate tall section for it,
+// this rides the scroll distance the hero already needs to scroll fully
+// out of view (heroEl.offsetHeight) — the same distance that triggers the
+// nav bar above — so no extra page space is spent on the effect.
 // ---------------------------------------------------------------------
-const philosophyEl = document.getElementById("philosophy");
-const philosophyTextEl = document.getElementById("philosophy-text");
+const heroSubtitleEl = document.getElementById("hero-subtitle");
 
-// Split the paragraph into one <span class="word"> per word, so each word
+// Split the subtitle into one <span class="word"> per word, so each word
 // can be colored independently. This is safe to do with innerHTML here
 // specifically because the text is our own hard-coded copy in index.html,
 // not data from products.json or any other untrusted source.
-const philosophyWords = philosophyTextEl.textContent.trim().split(/\s+/);
-philosophyTextEl.innerHTML = philosophyWords
+const subtitleWords = heroSubtitleEl.textContent.trim().split(/\s+/);
+heroSubtitleEl.innerHTML = subtitleWords
   .map((word) => `<span class="word">${word}</span>`)
   .join(" ");
-const wordEls = philosophyTextEl.querySelectorAll(".word");
+const subtitleWordEls = heroSubtitleEl.querySelectorAll(".word");
 
-function updatePhilosophyHighlight() {
-  const rect = philosophyEl.getBoundingClientRect();
-  // .philosophy is 200vh tall with its inner content pinned via `sticky`,
-  // so this scroll range is exactly one viewport-height's worth (200vh of
-  // section minus the 100vh it's pinned for). progress goes from 0 (the
-  // section's top has just reached the top of the viewport) to 1 (its
-  // bottom is about to leave the bottom of the viewport).
-  const scrollable = rect.height - window.innerHeight;
-  const progress = scrollable > 0 ? Math.min(Math.max(-rect.top / scrollable, 0), 1) : 1;
-
-  const litCount = Math.round(progress * wordEls.length);
-  wordEls.forEach((word, i) => {
+function updateSubtitleHighlight() {
+  // 0 at the very top of the page, 1 once you've scrolled one hero's-height
+  // — right around when the hero has fully exited and the nav bar appears.
+  const progress = Math.min(Math.max(window.scrollY / heroEl.offsetHeight, 0), 1);
+  const litCount = Math.round(progress * subtitleWordEls.length);
+  subtitleWordEls.forEach((word, i) => {
     word.classList.toggle("is-active", i < litCount);
   });
 }
 
-let philosophyTicking = false;
+let subtitleTicking = false;
 window.addEventListener("scroll", () => {
-  if (philosophyTicking) return;
-  philosophyTicking = true;
+  if (subtitleTicking) return;
+  subtitleTicking = true;
   requestAnimationFrame(() => {
-    updatePhilosophyHighlight();
-    philosophyTicking = false;
+    updateSubtitleHighlight();
+    subtitleTicking = false;
   });
 });
-updatePhilosophyHighlight(); // correct state immediately, e.g. on a page refresh mid-scroll
+updateSubtitleHighlight(); // correct state immediately, e.g. on a page refresh mid-scroll
 
 // ---------------------------------------------------------------------
 // Custom cursor: a small dot that snaps exactly to the mouse every frame

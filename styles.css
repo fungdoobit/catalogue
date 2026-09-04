@@ -159,9 +159,31 @@ body {
   letter-spacing: -0.03em;
 }
 
-.hero-tagline {
+.hero-subtitle {
+  font-size: clamp(1.1rem, 2.4vw, 1.4rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* script.js wraps every word of .hero-subtitle in one of these and toggles
+   "is-active" based on scroll position — see updateSubtitleHighlight() in
+   script.js. Unlit words use the same muted gray as secondary text
+   elsewhere, not a near-invisible one — it's a reading progression, not a
+   puzzle. */
+.hero-subtitle .word {
   color: var(--color-text-muted);
-  font-size: 1.15rem;
+  transition: color 0.2s ease;
+}
+
+.hero-subtitle .word.is-active {
+  color: var(--color-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-subtitle .word {
+    color: var(--color-text);
+    transition: none;
+  }
 }
 
 /* Plays once, on page load — this is the "entrance". `both` as the fourth
@@ -170,12 +192,12 @@ body {
    the final, fully-visible position for a split second first) and the *to*
    state applied after it ends. */
 .hero-title,
-.hero-tagline,
+.hero-subtitle,
 .scroll-cue {
   animation: rise-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.hero-tagline {
+.hero-subtitle {
   animation-delay: 0.15s;
 }
 
@@ -225,80 +247,10 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .hero-title,
-  .hero-tagline,
+  .hero-subtitle,
   .scroll-cue,
   .scroll-cue-arrow {
     animation: none;
-  }
-}
-
-/* ==========================================================================
-   Philosophy: scroll-scrubbed text highlight
-   Unlike .reveal above (which plays once and is done), this section's
-   highlight state is tied directly to *how far* you've scrolled through
-   it — scroll halfway through the section, half the words are lit.
-   The wrapper is 200vh tall (double a normal screen) purely to create
-   scrollable distance to scrub through; the inner content is `sticky`,
-   so it stays pinned in place on screen for that entire 200vh while the
-   page scrolls underneath it — same sticky trick as .site-nav, just used
-   to hold something still instead of slide something in.
-   ========================================================================== */
-.philosophy {
-  min-height: 200vh;
-  position: relative;
-}
-
-.philosophy-inner {
-  position: sticky;
-  top: 0;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-
-.philosophy-text {
-  /* A short, three-word statement reads as premium when it's treated like
-     a headline (big, bold, tight tracking) rather than body copy — same
-     scale of move as .hero-title, not a shrunken paragraph. */
-  max-width: 900px;
-  font-size: clamp(2.4rem, 6.5vw, 4.5rem);
-  font-weight: 800;
-  line-height: 1.2;
-  text-align: center;
-  letter-spacing: -0.03em;
-}
-
-/* script.js wraps every word in one of these. Unlit words use the same
-   muted gray as secondary text elsewhere on the page, not a near-invisible
-   one — the point is a reading progression, not a puzzle. */
-.philosophy-text .word {
-  color: var(--color-text-muted);
-  transition: color 0.2s ease;
-}
-
-.philosophy-text .word.is-active {
-  color: var(--color-text);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  /* Scroll-scrubbing is inherently a motion effect, so reduced-motion
-     visitors get the plain, fully-readable paragraph instead — normal
-     document flow, no pinning, every word already in its final color. */
-  .philosophy {
-    min-height: 0;
-  }
-
-  .philosophy-inner {
-    position: static;
-    min-height: 0;
-    padding: 64px 24px;
-  }
-
-  .philosophy-text .word {
-    color: var(--color-text);
-    transition: none;
   }
 }
 
