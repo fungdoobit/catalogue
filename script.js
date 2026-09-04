@@ -456,6 +456,34 @@ function attachCopyCode(actions, code) {
 // How long you need to hold hover before the preview appears.
 const VIDEO_HOVER_DELAY_MS = 700;
 
+// Remembers whether you last chose sound on or off, across every video on
+// the site and across visits (localStorage survives a page reload). There
+// is no way around browsers blocking *the very first* autoplay-with-sound
+// attempt before you've ever clicked anything — that's a deliberate,
+// universal restriction (see the long comment in attachVideoPreview()
+// below), not something a website can opt out of. What this *can* fix is
+// everything after that: once you've told a video "yes, sound", every
+// other video stops bothering to guess and just starts that way too,
+// instead of re-attempting and silently falling back on every single one.
+const SOUND_PREF_KEY = "catalogue-video-sound";
+
+function getSoundPreference() {
+  try {
+    return localStorage.getItem(SOUND_PREF_KEY); // "on", "off", or null (never chosen)
+  } catch {
+    return null; // localStorage can throw in private-browsing/locked-down contexts
+  }
+}
+
+function setSoundPreference(wantsSound) {
+  try {
+    localStorage.setItem(SOUND_PREF_KEY, wantsSound ? "on" : "off");
+  } catch {
+    // Nothing to do if storage is unavailable — the site still works, it
+    // just won't remember the choice for next time.
+  }
+}
+
 // Small inline icons for the mute button (same hand-written-SVG approach as
 // the scroll-cue arrow in the hero) — no icon library needed for two glyphs.
 const ICON_MUTED =
@@ -508,13 +536,29 @@ function attachVideoPreview(card, previewArea, videoUrl) {
   }
   updateMuteButton();
 
+  // A real click is the one thing that reliably turns sound on — see the
+  // long comment in the mouseenter handler below. stopPropagation keeps
+  // this from also bubbling up to the overlay's own click-to-unmute
+  // handler further down and re-toggling what this click just set.
   muteButton.addEventListener("click", (event) => {
-    // Without this, the click would also bubble up as a card mouse event —
-    // harmless here today, but stopping it keeps this button's click from
-    // ever accidentally triggering something added to the card later.
     event.stopPropagation();
     video.muted = !video.muted;
     updateMuteButton();
+    setSoundPreference(!video.muted);
+  });
+
+  // The small button is the precise control, but it's easy to miss over a
+  // playing video — clicking anywhere on the preview also counts as the
+  // same real gesture and unmutes (muteButton's stopPropagation keeps a
+  // click ON the button from double-handling here). Only ever turns sound
+  // ON this way; turning it back off stays a deliberate action on the
+  // button itself, not an accidental side effect of clicking the video.
+  overlay.addEventListener("click", () => {
+    if (video.muted) {
+      video.muted = false;
+      updateMuteButton();
+      setSoundPreference(true);
+    }
   });
 
   let hoverTimer = null;
@@ -527,15 +571,24 @@ function attachVideoPreview(card, previewArea, videoUrl) {
       if (!video.src) video.src = videoUrl;
       video.currentTime = 0;
 
-      // Try for sound first. Browsers only allow *unmuted* autoplay as a
-      // direct response to specific gesture types (a real click or tap),
-      // and hover is deliberately excluded from that list — otherwise any
-      // page could blast audio just from a mouse passing over it. So this
-      // will likely be blocked on a visitor's first encounter with the
-      // site; when that happens, fall back to muted so the video still
-      // actually plays, just silently, with the button available to turn
-      // sound on with a real click (which always works).
-      video.muted = false;
+      // Browsers only allow *unmuted* autoplay as a direct response to
+      // specific gesture types (a real click or tap) — hover is
+      // deliberately excluded from that list, and browsers explicitly
+      // close the obvious loophole too (starting muted, then flipping
+      // .muted off a moment later without a fresh gesture) — so there is
+      // no way to make the very first preview anyone ever hovers start
+      // with sound. Every site with a hover/autoplay preview has this
+      // same wall (YouTube and Instagram included) — it isn't fixable
+      // from here.
+      //
+      // What *is* fixable: once you've told a video "yes, sound" — by
+      // clicking the button or the video itself, both real gestures —
+      // getSoundPreference() remembers that choice (see its definition
+      // above), so every video after that skips the doomed unmuted
+      // attempt on a cold hover and starts muted immediately, with
+      // nothing to notice or correct.
+      const wantsSound = getSoundPreference() !== "off";
+      video.muted = !wantsSound;
       updateMuteButton();
       video.play().catch(() => {
         video.muted = true;

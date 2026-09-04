@@ -111,11 +111,20 @@ nothing extra and products with one don't load their clip on page load.
 It tries to play **with sound** immediately. Browsers only allow
 autoplay-with-sound as a direct response to specific gesture types (a
 real click or tap) — hover is deliberately excluded from that list, so
-pages can't blast audio just from a mouse passing over them. In
-practice this means a first-time visitor will likely see it fall back to
-muted automatically (the video still plays, just silently), with a small
-speaker button in the corner to turn sound on — clicking it is a real
-click, so that always works.
+pages can't blast audio just from a mouse passing over them, and there's
+no workaround (starting muted and flipping the `muted` property a moment
+later doesn't bypass it either — browsers explicitly block that too). In
+practice this means the very first preview anyone hovers, on their very
+first visit, always falls back to muted automatically (the video still
+plays, just silently) — this is true of every site with a hover/autoplay
+preview, not something specific to this one.
+
+What does carry over: clicking anywhere on the preview (the small
+speaker button, or the video itself) is a real click, so turning sound on
+that way always works — and that choice is remembered in `localStorage`
+(see `SOUND_PREF_KEY` in `script.js`), so every other video, this session
+and on future visits, starts already knowing you want sound instead of
+re-attempting and silently falling back every single time.
 
 Video files live in `videos/` and are referenced by a relative path
 (`"video": "videos/yourfile.mp4"`) — same idea as `og-image.png`, just

@@ -548,7 +548,10 @@ main {
      curve) so the video fading in and the card scaling up read as one
      coordinated motion rather than two separately-timed ones. */
   transition: opacity 0.4s cubic-bezier(0.33, 1, 0.68, 1);
-  pointer-events: none; /* lets hover/click reach the card underneath; the mute button re-enables its own */
+  /* Clickable (script.js listens here to unmute on any click, not just the
+     small button) — nothing underneath ever needs a click while this is
+     showing, since "Get it" lives outside .product-preview-area entirely. */
+  cursor: pointer;
 }
 
 .product-video-overlay.is-visible {
