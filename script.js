@@ -280,7 +280,17 @@ function renderCategoryPills() {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "pill" + (isActive ? " active" : "");
-      button.textContent = option;
+      // The top row's "All" (reset everything) reads fine on its own, but
+      // stacked directly under another "All" a row up, it reads as
+      // ambiguous ("all what?"). Specifically the row one level under
+      // "iPhone" — the actual iPhone models — gets the clarified label;
+      // checking the parent value here rather than a hardcoded level
+      // number means this still targets the right row even if some other
+      // branch of the category tree ends up deeper or shallower than
+      // iPhone's. If a different, non-"model" subcategory gets added
+      // elsewhere later, this wording may need to become configurable
+      // instead of tied to this one specific parent value.
+      button.textContent = isAll && activePath[level - 1] === "iPhone" ? "All models" : option;
       button.addEventListener("click", () => {
         // Truncating to `level` first means picking a new value at this
         // depth always discards whatever was selected deeper than it —
