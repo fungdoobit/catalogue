@@ -17,6 +17,47 @@ const gridEl = document.getElementById("product-grid");
 const pillsEl = document.getElementById("category-pills");
 const searchInputEl = document.getElementById("search-input");
 const emptyStateEl = document.getElementById("empty-state");
+const headerEl = document.getElementById("site-header");
+
+// Watches "reveal" elements (the product cards) and adds "is-visible" once
+// each one scrolls into the viewport — styles.css does the actual fade/rise
+// animation, this just decides *when* to trigger it. unobserve() after it
+// fires so each card only animates in once, not every time it re-enters view.
+const revealObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("is-visible");
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  },
+  { threshold: 0.15 }
+);
+
+// index is used to stagger the animation slightly per card (capped at
+// 300ms) so a row of cards cascades in rather than popping in all at once.
+function observeReveal(el, index) {
+  el.classList.add("reveal");
+  el.style.transitionDelay = `${Math.min(index * 60, 300)}ms`;
+  revealObserver.observe(el);
+}
+
+// The scroll listener below can fire many times per second (every pixel of
+// scroll, on some browsers/trackpads). requestAnimationFrame + this
+// "ticking" flag means the class-toggle work only actually runs once per
+// animation frame at most, instead of on every single scroll event —
+// otherwise this would waste work re-checking the same thing dozens of
+// times before the screen even repaints.
+let scrollTicking = false;
+window.addEventListener("scroll", () => {
+  if (scrollTicking) return;
+  scrollTicking = true;
+  requestAnimationFrame(() => {
+    headerEl.classList.toggle("is-scrolled", window.scrollY > 24);
+    scrollTicking = false;
+  });
+});
 
 init();
 
@@ -79,8 +120,10 @@ function render() {
   gridEl.innerHTML = "";
   emptyStateEl.hidden = filtered.length > 0;
 
-  filtered.forEach((product) => {
-    gridEl.appendChild(buildProductCard(product));
+  filtered.forEach((product, index) => {
+    const card = buildProductCard(product);
+    gridEl.appendChild(card);
+    observeReveal(card, index);
   });
 }
 

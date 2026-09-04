@@ -44,13 +44,45 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Respect the OS-level "reduce motion" accessibility setting: only turn on
+   smooth anchor-scrolling for people who haven't asked for less motion. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 /* ==========================================================================
    Header
+   `position: sticky` keeps it pinned to the top once you scroll past it —
+   unlike `fixed`, it stays in the normal document flow until then, so it
+   doesn't need extra top-padding hacks on the content below it. script.js
+   adds/removes the "is-scrolled" class, and this CSS just reacts to that
+   class — the JS never touches layout or styling directly.
    ========================================================================== */
 .site-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-bg);
+  padding: 64px 24px 32px;
+  transition: padding 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.site-header.is-scrolled {
+  padding: 14px 24px;
+  /* A translucent background + blur is the same "frosted glass" trick
+     Apple's own nav bars use — content peeks through faintly as it
+     scrolls underneath. -webkit- prefix is still needed for Safari. */
+  background: rgba(250, 250, 250, 0.75);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  box-shadow: 0 1px 0 var(--color-border);
+}
+
+.header-inner {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 64px 24px 32px;
   text-align: center;
 }
 
@@ -58,12 +90,28 @@ body {
   font-size: clamp(2rem, 5vw, 2.75rem);
   font-weight: 700;
   letter-spacing: -0.02em;
+  transition: font-size 0.3s ease;
+}
+
+.is-scrolled .site-title {
+  font-size: 1.25rem;
 }
 
 .site-tagline {
   margin-top: 8px;
   color: var(--color-text-muted);
   font-size: 1.1rem;
+  max-height: 40px;
+  overflow: hidden;
+  transition: opacity 0.25s ease, max-height 0.3s ease, margin-top 0.3s ease;
+}
+
+/* The tagline collapses away (rather than just fading) once the header is
+   in its compact state, so it doesn't leave empty space behind. */
+.is-scrolled .site-tagline {
+  opacity: 0;
+  max-height: 0;
+  margin-top: 0;
 }
 
 /* ==========================================================================
@@ -176,6 +224,14 @@ main {
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform 0.5s ease;
+}
+
+/* A slow, slightly-larger-than-you'd-expect zoom on hover reads as
+   "premium" rather than gimmicky — it's clipped by .product-card's
+   overflow: hidden above, so it never spills past the rounded corners. */
+.product-card:hover .product-image-wrap img {
+  transform: scale(1.06);
 }
 
 .badge {
@@ -227,17 +283,52 @@ main {
   color: #fff;
   background: var(--color-accent);
   border-radius: 10px;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.15s ease, transform 0.15s ease;
 }
 
 .product-cta:hover {
   background: var(--color-accent-hover);
+  transform: translateY(-1px);
+}
+
+/* Pressed state settles back down — small, but it's what makes a button
+   feel like it has physical weight instead of just changing color. */
+.product-cta:active {
+  transform: translateY(0);
 }
 
 .empty-state {
   text-align: center;
   color: var(--color-text-muted);
   padding: 48px 0;
+}
+
+/* ==========================================================================
+   Scroll reveal
+   script.js adds the "reveal" class to each card as it's created, then
+   adds "is-visible" once an IntersectionObserver reports the card has
+   scrolled into view — that's what actually triggers this transition.
+   Cards below the fold start invisible/shifted-down and settle into
+   place as you scroll to them, which is where the "premium" feel mostly
+   comes from. Reduced-motion users skip straight to the end state.
+   ========================================================================== */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
 
 /* ==========================================================================
