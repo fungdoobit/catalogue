@@ -152,11 +152,12 @@ body {
 .hero-wrap {
   min-height: 160svh;
   position: relative;
-  /* A very slight warm-to-cool wash from top to bottom, so the transition
-     from hero into the catalogue reads as a graceful descent rather than
-     a flat cut — subtle enough that it never looks like a "section",
-     just a gentle change in light. */
-  background: linear-gradient(180deg, var(--color-bg) 0%, #f1f1f3 100%);
+  /* A very slight wash from top to bottom, so the hero doesn't read as
+     flatly uniform — deliberately subtle (just a couple of shades off
+     --color-bg) so it fades into the page's normal background by the
+     time .hero-wrap hands off to main, with nothing sharp enough at that
+     boundary to read as a seam. */
+  background: linear-gradient(180deg, var(--color-bg) 0%, #f4f4f5 100%);
 }
 
 .hero {
@@ -419,12 +420,6 @@ main {
      nav bar so it never overlaps the search bar once it slides into
      view — see the --nav-height comment in the design tokens above. */
   padding: calc(24px + var(--nav-height)) 24px 64px;
-  /* Picks up exactly where .hero-wrap's own gradient leaves off (same
-     #f1f1f3), then eases back to the page's normal background over the
-     next stretch of scrolling — without this, the two independent
-     backgrounds would meet at a visible hard seam right where the hero
-     hands off to the grid. */
-  background: linear-gradient(180deg, #f1f1f3 0%, var(--color-bg) 260px, var(--color-bg) 100%);
 }
 
 .controls {
