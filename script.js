@@ -278,6 +278,13 @@ function buildProductCard(product) {
   image.loading = "lazy";
   imageWrap.appendChild(image);
 
+  // Optional per-product hover-preview video — see attachVideoPreview()
+  // below. Products with no "video" field in products.json simply never
+  // get this element at all, so there's nothing extra for them to load.
+  if (product.video) {
+    attachVideoPreview(card, imageWrap, product.video);
+  }
+
   const body = document.createElement("div");
   body.className = "product-body";
 
@@ -312,4 +319,44 @@ function buildProductCard(product) {
   card.appendChild(imageWrap);
   card.appendChild(body);
   return card;
+}
+
+// Hovering a card for 1.5s fades in a short looping video over the static
+// image — a quick preview, not a link to anywhere. Only wired up on
+// devices with a real mouse (supportsFineCursor, computed once below for
+// the custom cursor too): a touchscreen has no "hover and wait", just taps,
+// so this would never make sense to trigger there.
+function attachVideoPreview(card, imageWrap, videoUrl) {
+  if (!supportsFineCursor) return;
+
+  const video = document.createElement("video");
+  video.className = "product-video";
+  video.muted = true; // required for autoplay in every modern browser
+  video.loop = true;
+  video.playsInline = true;
+  video.preload = "none"; // don't fetch the file until someone actually hovers
+  imageWrap.appendChild(video);
+
+  let hoverTimer = null;
+
+  card.addEventListener("mouseenter", () => {
+    hoverTimer = setTimeout(() => {
+      // Setting .src here, not up front, means the video file is only
+      // ever downloaded the first time someone actually hovers long
+      // enough to see it — not for every card on every page load.
+      if (!video.src) video.src = videoUrl;
+      video.currentTime = 0;
+      // play() returns a promise that rejects if the browser blocks
+      // autoplay for some reason — catching it just means "don't crash",
+      // the video simply won't appear in that edge case.
+      video.play().catch(() => {});
+      video.classList.add("is-visible");
+    }, 1500);
+  });
+
+  card.addEventListener("mouseleave", () => {
+    clearTimeout(hoverTimer);
+    video.classList.remove("is-visible");
+    video.pause();
+  });
 }

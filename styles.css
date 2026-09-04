@@ -421,6 +421,29 @@ main {
 .product-image-wrap {
   aspect-ratio: 1 / 1;
   background: var(--color-bg);
+  position: relative; /* anchors .badge and .product-video to this box specifically, not the whole card */
+}
+
+/* Only created by script.js for products that have a "video" field —
+   hovering the card for 1.5s fades this in over the static image (see
+   attachVideoPreview() in script.js for the timing). pointer-events: none
+   means your cursor still "sees" the card underneath for the hover/click
+   itself; this is purely a visual layer on top. */
+.product-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transform: scale(1.03);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  pointer-events: none;
+}
+
+.product-video.is-visible {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .product-image-wrap img {

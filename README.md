@@ -57,9 +57,18 @@ Open `products.json` and edit the array. Each product looks like:
   "category": "Some Category",
   "badge": "Top Pick",
   "price": "$19.99",
-  "link": "https://your-affiliate-link.com"
+  "link": "https://your-affiliate-link.com",
+  "video": "https://example.com/preview.mp4"
 }
 ```
 
-`badge` and `price` are optional — leave `badge` as `""` or omit `price`
-entirely if a product doesn't have one.
+`badge`, `price`, and `video` are all optional — leave `badge` as `""`,
+omit `price`, or omit `video` entirely if a product doesn't have one.
+
+`video` (optional) is a short looping preview clip. Hover a card for 1.5s
+on desktop and it fades in over the product photo — a quick preview, not
+a link anywhere. It's skipped entirely on touch devices (there's no
+"hover and wait" gesture on a phone), and the video file itself isn't
+downloaded until someone actually hovers long enough to see it, so
+products without a video cost nothing extra and products with one don't
+load their clip on page load.
