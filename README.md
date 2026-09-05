@@ -11,6 +11,8 @@ no build step, no frameworks, no backend.
 - `styles.css` — all styling
 - `script.js` — loads `products.json` and handles search + category filtering
 - `products.json` — the product data (edit this to add/change products)
+- `scripts/add_product.py` — automates adding a product (see "Adding a
+  product automatically" below)
 
 ## Preview locally
 
@@ -48,7 +50,41 @@ path.
 
 ## Editing products
 
-Open `products.json` and edit the array. Each product looks like:
+### Adding a product automatically
+
+`scripts/add_product.py` does the manual work that went into adding every
+product so far by hand: it crops the source photo tightly around the
+actual item — the same fix as the "UGREEN photo is a bit too small" one,
+generalized — saves it into `images/`, copies a preview clip into
+`videos/` if you give it one, and appends the matching entry to
+`products.json`. It never touches git; review the result and
+commit/push it yourself.
+
+Needs Pillow (`pip install Pillow`) — nothing else.
+
+```bash
+python3 scripts/add_product.py \
+  --name "Product Name" \
+  --link "https://your-affiliate-link.com" \
+  --category "Some Category" \
+  --image path/or/url/to/photo.png \
+  --subcategory "Sub Level 1" "Sub Level 2" \
+  --price "\$19.99" \
+  --code "ABC-123-XYZ" \
+  --video path/or/url/to/preview.mp4
+```
+
+`--image`/`--video` accept a local file path or a URL. Filenames are
+derived from `--name` (pass `--slug` for a cleaner one — e.g.
+`--slug tapo-cctv` instead of whatever `"Tapo CCTV (C211 / C200 / C200C /
+TC60)"` slugifies to). Add `--dry-run` to preview what it would do
+without writing anything, or `--force` to replace an existing product
+with the same name/link instead of erroring out.
+
+### Editing products.json by hand
+
+Or open `products.json` directly and edit the array yourself. Each
+product looks like:
 
 ```json
 {
