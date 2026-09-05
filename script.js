@@ -496,22 +496,23 @@ const ICON_MUTED =
   '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>';
 const ICON_UNMUTED =
   '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>';
+const ICON_PLAY =
+  '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>';
 
-// Holding hover on a card replaces the photo, category, name, and price
+// On desktop, holding hover on a card for VIDEO_HOVER_DELAY_MS opens the
+// preview. On touch devices there's no "hover and wait" gesture at all, so
+// a single tap opens it instead (see the bottom of this function) — and
+// tapping is a real, direct gesture, so unlike a cold hover it actually
+// gets to try for sound with a real chance of succeeding.
+//
+// Either way, the preview replaces the photo, category, name, and price
 // (everything in .product-preview-area — see buildProductCard() above)
 // with a short looping video covering that exact same area, while the
 // whole card lifts above its neighbors (the "is-previewing" class in
 // styles.css) as one single unit — a quick preview, not a link to
 // anywhere. The "Get it" button lives outside .product-preview-area, so
-// it's the one thing that always stays visible underneath. Tries to play
-// with sound; falls back to muted if the browser blocks that (see the
-// mouseenter handler below for why). Only wired up on devices with a real
-// mouse (supportsFineCursor, computed further down for the custom cursor
-// too): a touchscreen has no "hover and wait", just taps, so this would
-// never make sense to trigger there.
+// it's the one thing that always stays visible underneath.
 function attachVideoPreview(card, previewArea, videoUrl) {
-  if (!supportsFineCursor) return;
-
   // inset: 0 here exactly matches .product-preview-area's own box (photo
   // + text), covering it edge-to-edge — not growing past it, unlike the
   // earlier version of this feature. That's what removed both bugs from
@@ -525,7 +526,7 @@ function attachVideoPreview(card, previewArea, videoUrl) {
   video.className = "product-video";
   video.loop = true;
   video.playsInline = true;
-  video.preload = "none"; // don't fetch the file until someone actually hovers
+  video.preload = "none"; // don't fetch the file until someone actually triggers the preview
   overlay.appendChild(video);
 
   const muteButton = document.createElement("button");
@@ -543,9 +544,9 @@ function attachVideoPreview(card, previewArea, videoUrl) {
   updateMuteButton();
 
   // A real click is the one thing that reliably turns sound on — see the
-  // long comment in the mouseenter handler below. stopPropagation keeps
-  // this from also bubbling up to the overlay's own click-to-unmute
-  // handler further down and re-toggling what this click just set.
+  // long comment in showPreview() below. stopPropagation keeps this from
+  // also bubbling up to the overlay's own click handler (unmute on
+  // desktop, close-on-second-tap on touch) and being handled twice.
   muteButton.addEventListener("click", (event) => {
     event.stopPropagation();
     video.muted = !video.muted;
@@ -553,66 +554,109 @@ function attachVideoPreview(card, previewArea, videoUrl) {
     setSoundPreference(!video.muted);
   });
 
-  // The small button is the precise control, but it's easy to miss over a
-  // playing video — clicking anywhere on the preview also counts as the
-  // same real gesture and unmutes (muteButton's stopPropagation keeps a
-  // click ON the button from double-handling here). Only ever turns sound
-  // ON this way; turning it back off stays a deliberate action on the
-  // button itself, not an accidental side effect of clicking the video.
-  overlay.addEventListener("click", () => {
-    if (video.muted) {
-      video.muted = false;
+  // Setting .src here, not up front, means the video file is only ever
+  // downloaded the first time someone actually triggers the preview long
+  // enough (or taps) to see it — not for every card on every page load.
+  function showPreview() {
+    if (!video.src) video.src = videoUrl;
+    video.currentTime = 0;
+
+    // Browsers only allow *unmuted* autoplay as a direct response to
+    // specific gesture types (a real click or tap) — hover is
+    // deliberately excluded from that list, and browsers explicitly
+    // close the obvious loophole too (starting muted, then flipping
+    // .muted off a moment later without a fresh gesture) — so there is
+    // no way to make the very first preview anyone ever *hovers* start
+    // with sound. Every site with a hover/autoplay preview has this same
+    // wall (YouTube and Instagram included) — it isn't fixable from
+    // here. A tap is a real gesture though, so on touch devices this
+    // attempt has a genuine shot at succeeding on the very first try.
+    //
+    // What's fixable everywhere: once you've told a video "yes, sound" —
+    // by clicking/tapping the button or the video itself, all real
+    // gestures — getSoundPreference() remembers that choice (see its
+    // definition above), so every video after that skips a doomed
+    // unmuted attempt and starts muted immediately instead, with nothing
+    // to notice or correct.
+    const wantsSound = getSoundPreference() !== "off";
+    video.muted = !wantsSound;
+    updateMuteButton();
+    video.play().catch(() => {
+      video.muted = true;
       updateMuteButton();
-      setSoundPreference(true);
-    }
-  });
+      video.play().catch(() => {});
+    });
 
-  let hoverTimer = null;
+    overlay.classList.add("is-visible");
+    muteButton.classList.add("is-visible");
+    card.classList.add("is-previewing");
+  }
 
-  card.addEventListener("mouseenter", () => {
-    hoverTimer = setTimeout(() => {
-      // Setting .src here, not up front, means the video file is only
-      // ever downloaded the first time someone actually hovers long
-      // enough to see it — not for every card on every page load.
-      if (!video.src) video.src = videoUrl;
-      video.currentTime = 0;
-
-      // Browsers only allow *unmuted* autoplay as a direct response to
-      // specific gesture types (a real click or tap) — hover is
-      // deliberately excluded from that list, and browsers explicitly
-      // close the obvious loophole too (starting muted, then flipping
-      // .muted off a moment later without a fresh gesture) — so there is
-      // no way to make the very first preview anyone ever hovers start
-      // with sound. Every site with a hover/autoplay preview has this
-      // same wall (YouTube and Instagram included) — it isn't fixable
-      // from here.
-      //
-      // What *is* fixable: once you've told a video "yes, sound" — by
-      // clicking the button or the video itself, both real gestures —
-      // getSoundPreference() remembers that choice (see its definition
-      // above), so every video after that skips the doomed unmuted
-      // attempt on a cold hover and starts muted immediately, with
-      // nothing to notice or correct.
-      const wantsSound = getSoundPreference() !== "off";
-      video.muted = !wantsSound;
-      updateMuteButton();
-      video.play().catch(() => {
-        video.muted = true;
-        updateMuteButton();
-        video.play().catch(() => {});
-      });
-
-      overlay.classList.add("is-visible");
-      muteButton.classList.add("is-visible");
-      card.classList.add("is-previewing");
-    }, VIDEO_HOVER_DELAY_MS);
-  });
-
-  card.addEventListener("mouseleave", () => {
-    clearTimeout(hoverTimer);
+  function hidePreview() {
     overlay.classList.remove("is-visible");
     muteButton.classList.remove("is-visible");
     card.classList.remove("is-previewing");
     video.pause();
-  });
+  }
+
+  if (supportsFineCursor) {
+    // The small button is the precise control, but it's easy to miss over
+    // a playing video — clicking anywhere on the preview also counts as
+    // the same real gesture and unmutes (muteButton's stopPropagation
+    // keeps a click ON the button from double-handling here). Only ever
+    // turns sound ON this way; turning it back off stays a deliberate
+    // action on the button itself, not an accidental side effect of
+    // clicking the video.
+    overlay.addEventListener("click", () => {
+      if (video.muted) {
+        video.muted = false;
+        updateMuteButton();
+        setSoundPreference(true);
+      }
+    });
+
+    let hoverTimer = null;
+    card.addEventListener("mouseenter", () => {
+      hoverTimer = setTimeout(showPreview, VIDEO_HOVER_DELAY_MS);
+    });
+    card.addEventListener("mouseleave", () => {
+      clearTimeout(hoverTimer);
+      hidePreview();
+    });
+  } else {
+    // There's no hover to discover this with on touch, so a small static
+    // play icon hints that tapping the photo does something — it fades
+    // out the moment the preview opens (its own CSS rule keyed off
+    // .product-card.is-previewing) and never comes back for this card,
+    // matching the mute button's corner on the opposite side.
+    const hint = document.createElement("div");
+    hint.className = "product-video-hint";
+    hint.setAttribute("aria-hidden", "true");
+    hint.innerHTML = ICON_PLAY;
+    previewArea.appendChild(hint);
+
+    // Touch: no hover to open it or mouseleave to close it, so tapping
+    // the preview toggles it open/closed instead. Scoped to previewArea
+    // rather than the whole card so a tap on "Get it" or "Copy code"
+    // (outside .product-preview-area) never gets swallowed by this.
+    previewArea.addEventListener("click", () => {
+      if (card.classList.contains("is-previewing")) {
+        hidePreview();
+        closeActiveTouchPreview = null;
+      } else {
+        // Only one preview open at a time — opening this one closes
+        // whatever the last tap opened, the same way moving the mouse to
+        // a different card does on desktop.
+        if (closeActiveTouchPreview) closeActiveTouchPreview();
+        showPreview();
+        closeActiveTouchPreview = hidePreview;
+      }
+    });
+  }
 }
+
+// Tracks whichever touch-opened preview is currently showing, across every
+// card, so opening a new one can close it first — see attachVideoPreview()
+// above. There's nothing analogous to track on desktop: hover naturally
+// only ever has one card active at a time.
+let closeActiveTouchPreview = null;

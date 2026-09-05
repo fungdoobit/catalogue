@@ -102,11 +102,18 @@ filter that leads to an empty grid. Adding a product for a new model
 0.7s on desktop and it takes over the photo, category, name, and price
 with the video (the "Get it" button is the one thing that stays put and
 visible below it), while the whole card lifts and grows above its
-neighbors as a single unit — a quick preview, not a link anywhere. It's
-skipped entirely on touch devices (there's no "hover and wait" gesture
-on a phone), and the video file itself isn't downloaded until someone
-actually hovers long enough to see it, so products without a video cost
-nothing extra and products with one don't load their clip on page load.
+neighbors as a single unit — a quick preview, not a link anywhere. The
+video file itself isn't downloaded until someone actually triggers the
+preview, so products without a video cost nothing extra and products
+with one don't load their clip on page load.
+
+There's no "hover and wait" gesture on a touchscreen, so on touch devices
+a single tap on the photo opens the same preview instead (a small play
+icon in the corner hints that it's tappable, since there's no hover to
+discover it with otherwise), and tapping it again closes it — only one
+card's preview is ever open at a time, so opening a new one closes
+whichever was open before. Tapping "Get it" or "Copy code" is unaffected;
+only the photo/text area itself toggles the preview.
 
 It tries to play **with sound** immediately. Browsers only allow
 autoplay-with-sound as a direct response to specific gesture types (a
@@ -114,10 +121,12 @@ real click or tap) — hover is deliberately excluded from that list, so
 pages can't blast audio just from a mouse passing over them, and there's
 no workaround (starting muted and flipping the `muted` property a moment
 later doesn't bypass it either — browsers explicitly block that too). In
-practice this means the very first preview anyone hovers, on their very
+practice this means the very first preview anyone *hovers*, on their very
 first visit, always falls back to muted automatically (the video still
 plays, just silently) — this is true of every site with a hover/autoplay
-preview, not something specific to this one.
+preview, not something specific to this one. A tap is a real gesture
+though, so on touch devices the very first preview has a genuine shot at
+sound working immediately.
 
 What does carry over: clicking anywhere on the preview (the small
 speaker button, or the video itself) is a real click, so turning sound on

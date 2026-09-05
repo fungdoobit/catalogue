@@ -623,6 +623,31 @@ main {
   opacity: 1;
 }
 
+/* Touch devices only (script.js never creates this on desktop) — sits in
+   the opposite corner from the mute button as a quiet "tap to preview"
+   hint, since there's no hover to stumble onto it with otherwise. Purely
+   decorative: pointer-events: none means the tap is always handled by
+   .product-preview-area itself underneath, hint present or not. */
+.product-video-hint {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.product-card.is-previewing .product-video-hint {
+  opacity: 0;
+}
+
 .product-video {
   position: absolute;
   inset: 0;
